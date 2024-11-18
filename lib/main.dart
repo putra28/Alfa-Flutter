@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
+        fontFamily: 'Dongle',
         colorScheme: const ColorScheme(
           primary: Color(0xFFBB1724), // warna utama
           secondary: Color(0xFFE57373), // warna sekunder

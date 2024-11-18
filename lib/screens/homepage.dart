@@ -1,5 +1,6 @@
 // lib/screens/homepage.dart
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,34 +26,31 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text("Home Page"),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
-        ),
-      ),
-      drawer: Drawer(
-        child: ListView(
+        titleSpacing: 0, // Agar image berada di pojok kiri
+        title: Row(
+          mainAxisAlignment:
+              MainAxisAlignment.spaceBetween, // Atur posisi elemen
           children: [
-            ListTile(
-              title: const Text("Home"),
-              onTap: () {
-                _onMenuItemSelected(0);
-              },
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: Image.asset(
+                'assets/images/logo_alfamart_white.png',
+                width: 75, // Sesuaikan ukuran logo
+              ),
             ),
-            ListTile(
-              title: const Text("Profile"),
-              onTap: () {
-                _onMenuItemSelected(1);
-              },
-            ),
-            ListTile(
-              title: const Text("Settings"),
-              onTap: () {
-                _onMenuItemSelected(2);
-              },
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: Text(
+                "Layanan Informasi Pembayaran PLN",
+                style: GoogleFonts.dongle(
+                  textStyle: const TextStyle(
+                    fontSize: 28, // Sesuaikan ukuran teks
+                    fontWeight: FontWeight
+                        .bold, // Tambahkan jika ingin teks lebih tegas
+                    color: Colors.white, // Pastikan warna sesuai tema AppBar
+                  ),
+                ),
+              ),
             ),
           ],
         ),

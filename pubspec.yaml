@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   drawerbehavior: ^3.0.0
+  google_fonts: ^6.2.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -64,6 +65,7 @@ flutter:
   assets:
     - assets/images/logo_alfamart_transparent.png
     - assets/images/logo_alfamart_white.png
+    - assets/images/banner.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -76,12 +78,13 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+    - family: Dongle
+      fonts:
+        - asset: fonts/Dongle-Regular.ttf
+        - asset: fonts/Dongle-Light.ttf
+        - asset: fonts/Dongle-Bold.ttf
+          weight: 700
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
