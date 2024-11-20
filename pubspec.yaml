@@ -66,6 +66,7 @@ flutter:
     - assets/images/logo_alfamart_transparent.png
     - assets/images/logo_alfamart_white.png
     - assets/images/banner.jpg
+    - assets/images/albi.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

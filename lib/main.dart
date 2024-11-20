@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'screens/homepage.dart';
 import 'screens/loading_screen.dart';
+import 'screens/postpaid_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(),
       routes: {
         '/loading': (context) => const LoadingScreen(),
+        '/plnpostpaid': (context) => const postpaid_screen(),
       },
     );
   }

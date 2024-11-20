@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class ISOMessageParsing {
   static void main() {
     printResponse();
@@ -56,22 +54,27 @@ class ISOMessageParsing {
       if (primaryBitmapBinary[bit - 1] == '1') {
         if (bit == 2 || bit == 32) {
           // Bits dengan panjang variabel
-          int length = int.parse(isoMessage.substring(currentIndex, currentIndex + 2));
+          int length =
+              int.parse(isoMessage.substring(currentIndex, currentIndex + 2));
           currentIndex += 2; // Pindah ke data setelah length
-          String value = isoMessage.substring(currentIndex, currentIndex + length);
+          String value =
+              isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
           print("Bit $bit: $value (Length: $length)");
         } else if (bit == 48) {
           // Bits dengan panjang variabel
-          int length = int.parse(isoMessage.substring(currentIndex, currentIndex + 3));
+          int length =
+              int.parse(isoMessage.substring(currentIndex, currentIndex + 3));
           currentIndex += 3; // Pindah ke data setelah length
-          String value = isoMessage.substring(currentIndex, currentIndex + length);
+          String value =
+              isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
           print("Bit $bit: $value (Length: $length)");
         } else if (bitLengths.containsKey(bit)) {
           // Bits dengan panjang tetap
           int length = bitLengths[bit]!;
-          String value = isoMessage.substring(currentIndex, currentIndex + length);
+          String value =
+              isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
           print("Bit $bit: $value");
         }
