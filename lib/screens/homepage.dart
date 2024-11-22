@@ -1,7 +1,6 @@
 // lib/screens/homepage.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/ISOMessageCreate.dart'; // Import file processor.dart
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,28 +10,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final TextEditingController _controller = TextEditingController();
-  String _outputISOMessage = ""; // Variabel untuk menyimpan output
-  String _outputISOMessageParsing = ""; // Variabel untuk menyimpan output
-
-  void _handleSubmit() async {
-    final processor = Isomessagecreate(); // Buat instance Processor
-    final isoMessage =
-        processor.createIsoMessage(_controller.text); // Proses input
-
-    setState(() {
-      _outputISOMessage = isoMessage; // Simpan ISO message yang dikirim
-      _outputISOMessageParsing =
-          'Waiting for response...'; // Status awal untuk parsing
-    });
-
-    // Kirim ISO message ke server dan tunggu respons
-    String serverResponse = await processor.sendISOMessage(isoMessage);
-
-    setState(() {
-      _outputISOMessageParsing = serverResponse; // Simpan respons dari server
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +45,14 @@ class _HomePageState extends State<HomePage> {
     body: SingleChildScrollView(
       child: Column(
         children: [
-          Image.asset('assets/images/banner.jpg'),
+          SizedBox(height: 20),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            child: Image.asset(
+              'assets/images/widthBanner.png',
+              width: double.infinity,
+            ),
+          ),
           SizedBox(height: 20),
           Text(
             'Silahkan Pilih Produk',
@@ -97,8 +81,13 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                             color: Theme.of(context).colorScheme.primary,
-                            width: 5),
+                            width: 3),
                         color: Colors.white,
+                      ),
+                      child: Image.asset(
+                        'assets/images/postpaid.png',
+                        width: 100,
+                        height: 100,
                       ),
                     ),
                     Padding(
@@ -117,59 +106,82 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              Column(
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 5),
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    'PLN Prepaid',
-                    style: GoogleFonts.dongle(
-                      textStyle: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/plnprepaid');
+                },
+                child: Column(
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 3),
+                        color: Colors.white,
+                      ),
+                      child: Image.asset(
+                        'assets/images/prepaid.png',
+                        width: 100,
+                        height: 100,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(right: 20),
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 5),
-                      color: Colors.white,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 20),
-                    child: Text(
-                      'PLN Nontaglis',
-                      style: GoogleFonts.dongle(
-                        textStyle: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 0),
+                      child: Text(
+                        'PLN Prepaid',
+                        style: GoogleFonts.dongle(
+                          textStyle: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/plnnontaglis');
+                },
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(right: 20),
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 3),
+                        color: Colors.white,
+                      ),
+                      child: Image.asset(
+                        'assets/images/nontaglis.png',
+                        width: 100,
+                        height: 100,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: Text(
+                        'PLN Nontaglis',
+                        style: GoogleFonts.dongle(
+                          textStyle: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

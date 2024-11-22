@@ -1,41 +1,37 @@
-// lib/screens/postpaid_screen.dart
+// lib/screens/nontaglis_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/ISOMessageCreate.dart'; // Import file processor.dart
-import '../services/ISOMessageParsing.dart'; // Import file untuk ISOMessageParsing
 
-class postpaid_screen extends StatefulWidget {
-  const postpaid_screen({super.key});
+class nontaglis_screen extends StatefulWidget {
+  const nontaglis_screen({super.key});
 
   @override
-  _postpaid_screenState createState() => _postpaid_screenState();
+  _nontaglis_screenState createState() => _nontaglis_screenState();
 }
 
-class _postpaid_screenState extends State<postpaid_screen> {
+class _nontaglis_screenState extends State<nontaglis_screen> {
   final TextEditingController _controller = TextEditingController();
   String _outputISOMessage = ""; // Variabel untuk menyimpan output
   String _outputISOMessageParsing = ""; // Variabel untuk menyimpan output
 
   void _handleSubmit() async {
     final processor = Isomessagecreate(); // Buat instance Processor
-    final processorParsing = ISOMessageParsing(); // Buat instance Processor
     final isoMessage =
         processor.createIsoMessage(_controller.text); // Proses input
-    final parsingISO =
-        processorParsing.printResponse(_controller.text); // Proses input
 
     setState(() {
       _outputISOMessage = isoMessage; // Simpan ISO message yang dikirim
       _outputISOMessageParsing =
-          parsingISO; // Status awal untuk parsing
+          'Waiting for response...'; // Status awal untuk parsing
     });
 
     // Kirim ISO message ke server dan tunggu respons
-    // // String serverResponse = await processor.sendISOMessage(isoMessage);
+    String serverResponse = await processor.sendISOMessage(isoMessage);
 
-    // setState(() {
-    //   _outputISOMessageParsing = serverResponse; // Simpan respons dari server
-    // });
+    setState(() {
+      _outputISOMessageParsing = serverResponse; // Simpan respons dari server
+    });
   }
 
   @override
@@ -72,17 +68,10 @@ class _postpaid_screenState extends State<postpaid_screen> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 20),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                child: Image.asset(
-                  'assets/images/widthBanner.png',
-                  width: double.infinity,
-                ),
-              ),
+              Image.asset('assets/images/banner.jpg'),
               SizedBox(height: 20),
               Text(
-                'Masukkan ID Pelanggan',
+                'Masukkan No. Registrasi',
                 style: GoogleFonts.dongle(
                   textStyle: const TextStyle(
                     fontSize: 36,
@@ -101,7 +90,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                         controller: _controller,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
-                          labelText: 'ID Pelanggan',
+                          labelText: 'No. Registrasi',
                         ),
                       ),
                     ),
@@ -120,24 +109,26 @@ class _postpaid_screenState extends State<postpaid_screen> {
                 ],
               ),
               SizedBox(height: 20),
-              if (_outputISOMessageParsing.isEmpty)
-                Column(
-                  children: [
-                    Image.asset('assets/images/albi.png', width: 100, height: 100),
-                    Text(
-                      'Silahkan Masukkan ID Pelanggan Dengan Benar',
-                      style: GoogleFonts.dongle(
-                        textStyle: const TextStyle(
-                          fontSize: 24,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
+              Image.asset('assets/images/albi.png', width: 100, height: 100),
+              Text(
+                'Silahkan Masukkan No. Registrasi Dengan Benar',
+                style: GoogleFonts.dongle(
+                  textStyle: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.black,
+                  ),
                 ),
+              ),
               SizedBox(height: 10),
               Text(
-                'Output Response:' + _outputISOMessageParsing, // Tampilkan hasil output
+                'Output ISO Message:' +
+                    _outputISOMessage, // Tampilkan hasil output
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Output Response:' +
+                    _outputISOMessageParsing, // Tampilkan hasil output
                 style: TextStyle(fontSize: 16),
               ),
             ],
