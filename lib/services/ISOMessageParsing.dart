@@ -8,22 +8,23 @@ class ISOMessageParsing {
     } catch (e) {
       // print("Failed to process response.");
       // print(e);
-      return 'Failed to Process';
+      return e.toString();
     }
+  }
+
+  static String coba(String isoMessage, String idpel) {
+    return idpel;
   }
 
   static String parseISOResponse(String isoMessage, String idpel) {
     // MTI (4 karakter pertama)
     String mti = isoMessage.substring(0, 4);
-    // print("MTI: $mti");
 
     // Primary Bitmap (16 karakter setelah MTI)
     String primaryBitmapHex = isoMessage.substring(4, 20);
-    // print("Primary Bitmap (Hex): $primaryBitmapHex");
 
     // Convert Primary Bitmap to Binary
     String primaryBitmapBinary = hexToBinary(primaryBitmapHex);
-    // print("Primary Bitmap (Binary): $primaryBitmapBinary");
 
     // Map untuk mendefinisikan panjang setiap bit
     Map<int, int> bitLengths = {
@@ -58,15 +59,12 @@ class ISOMessageParsing {
           String value =
               isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
-          // print("Bit $bit: $value (Length: $length)");
         } else if (bit == 39) {
           int length = bitLengths[bit]!;
           String value =
               isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
           bit39 = value; // Simpan nilai Bit 39 ke variabel
-          // bit39 = '14';
-          // print("Bit $bit: $value");
         } else if (bit == 48) {
           // Bits dengan panjang variabel
           int length =
@@ -76,14 +74,12 @@ class ISOMessageParsing {
               isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
           bit48 = value; // Simpan nilai Bit 48 ke variabel
-          // print("Bit $bit: $value (Length: $length)");
         } else if (bitLengths.containsKey(bit)) {
           // Bits dengan panjang tetap
           int length = bitLengths[bit]!;
           String value =
               isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
-          // print("Bit $bit: $value");
         }
       }
     }
@@ -92,142 +88,133 @@ class ISOMessageParsing {
     if (bit39 != null) {
       return processResponseCode(bit39, idpel, bit48);
     } else {
-      // print("Bit 39 tidak ditemukan.");
       return "Bit 39 tidak ditemukan.";
     }
   }
 
-  static String parseBit48(String bit48) {
+  static String parseBit48(String bit48, String idpel) {
     // print("Parsing Bit 48:");
 
     // Mulai parsing data berdasarkan struktur
     int currentIndex = 0;
-   String parsedResult = '';
+    String parsedResult = '';
 
     // 1. ID Pelanggan (13 karakter)
     String idPelanggan = bit48.substring(currentIndex, currentIndex + 12);
     currentIndex += 12;
-    parsedResult += "$idPelanggan idpel\n";
-    // print("$idPelanggan idpel");
+    parsedResult += "$idpel idpel\n";
 
     // 2. Jumlah Tagihan (3 karakter)
     String jumlahTagihan = bit48.substring(currentIndex, currentIndex + 3);
     currentIndex += 3;
     parsedResult += "$jumlahTagihan jumlahTagihan\n";
-    // print("$jumlahTagihan jml tagihan");
 
     // 3. Scref (32 karakter)
     String scref = bit48.substring(currentIndex, currentIndex + 32);
     currentIndex += 32;
     parsedResult += "$scref scref\n";
-    // print("$scref scref");
 
     // 4. Nama (20 karakter)
     String nama = bit48.substring(currentIndex, currentIndex + 25).trim();
     currentIndex += 25;
     parsedResult += "$nama nama\n";
-    // print("$nama nama");
 
     // 5. Kode Unit (5 karakter)
     String kodeUnit = bit48.substring(currentIndex, currentIndex + 5);
     currentIndex += 5;
-    // print("$kodeUnit kode unit");
+    parsedResult += "$kodeUnit kodeUnit\n";
 
     // 6. Telepon Unit (16 karakter, jika kosong tetap dihitung)
     String teleponUnit =
         bit48.substring(currentIndex, currentIndex + 15).trim();
     currentIndex += 15;
-    // print("$teleponUnit telepon unit");
+    parsedResult += "$teleponUnit teleponUnit\n";
 
     // 7. Tarif (2 karakter)
     String tarif = bit48.substring(currentIndex, currentIndex + 4).trim();
     currentIndex += 4;
-    // print("$tarif tarif");
+    parsedResult += "$tarif tarif\n";
 
     // 8. Daya (9 karakter)
     String daya = bit48.substring(currentIndex, currentIndex + 9);
     currentIndex += 9;
-    // print("$daya daya");
+    parsedResult += "$daya daya\n";
 
     // 9. Admin (9 karakter)
     String admin = bit48.substring(currentIndex, currentIndex + 9);
     currentIndex += 9;
-    // print("$admin admin");
+    parsedResult += "$admin admin\n";
 
     // 10. Periode (6 karakter)
     String periode = bit48.substring(currentIndex, currentIndex + 6);
     currentIndex += 6;
-    // print("$periode periode");
+    parsedResult += "$periode periode\n";
 
     // 11. Tanggal Akhir (8 karakter)
     String tanggalAkhir = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    // print("$tanggalAkhir tgl akhir");
+    parsedResult += "$tanggalAkhir tanggalAkhir\n";
 
     // 12. Tanggal Baca (8 karakter)
     String tanggalBaca = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    // print("$tanggalBaca tgl baca");
+    parsedResult += "$tanggalBaca tanggalBaca\n";
 
     // 13. Tagihan (12 karakter)
     String tagihan = bit48.substring(currentIndex, currentIndex + 12);
     currentIndex += 12;
-    // print("$tagihan tagihan");
+    parsedResult += "$tagihan tagihan\n";
 
     // 14. Kode Insentif (1 karakter)
     String kodeInsentif = bit48.substring(currentIndex, currentIndex + 1);
     currentIndex += 1;
-    // print("$kodeInsentif kode insentif");
+    parsedResult += "$kodeInsentif kodeInsentif\n";
 
     // 15. Insentif (10 karakter)
     String insentif = bit48.substring(currentIndex, currentIndex + 10);
     currentIndex += 10;
-    // print("$insentif insentif");
+    parsedResult += "$insentif insentif\n";
 
     // 16. Pajak (10 karakter)
     String pajak = bit48.substring(currentIndex, currentIndex + 10);
     currentIndex += 10;
-    // print("$pajak tax");
+    parsedResult += "$pajak pajak\n";
 
     // 17. Denda (12 karakter)
     String denda = bit48.substring(currentIndex, currentIndex + 12);
     currentIndex += 12;
-    // print("$denda denda");
+    parsedResult += "$denda denda\n";
 
     // 18. Stand 1 Awal (8 karakter)
     String stand1Awal = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    // print("$stand1Awal stand1 awal");
+    parsedResult += "$stand1Awal stand1Awal\n";
 
     // 19. Stand 1 Akhir (8 karakter)
     String stand1Akhir = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    // print("$stand1Akhir stand1 akhir");
+    parsedResult += "$stand1Akhir stand1Akhir\n";
 
     // 20. Stand 2 Awal (8 karakter)
     String stand2Awal = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    // print("$stand2Awal stand2 awal");
+    parsedResult += "$stand2Awal perstand2Awaliode\n";
 
     // 21. Stand 2 Akhir (8 karakter)
     String stand2Akhir = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    // print("$stand2Akhir stand2 akhir");
+    parsedResult += "$stand2Akhir stand2Akhir\n";
 
     // 22. Reff 1 (10 karakter)
-    String reff1 = bit48.substring(currentIndex, currentIndex + 10);
-    currentIndex += 10;
-    // print("$reff1 reff 1");
+    String reff1 = bit48.substring(currentIndex, currentIndex + 8);
+    currentIndex += 8;
+    parsedResult += "$reff1 reff1\n";
 
     // 23. Reff 2 (10 karakter)
-    String reff2 = bit48.substring(currentIndex, currentIndex + 10);
-    currentIndex += 10;
-    // print("$reff2 reff 2");
+    String reff2 = bit48.substring(currentIndex, currentIndex + 8);
+    currentIndex += 8;
+    parsedResult += "$reff2 reff2\n";
 
-    // 24. Reff 3 (10 karakter)
-    String reff3 = bit48.substring(currentIndex, currentIndex + 10);
-    currentIndex += 10;
-    // print("$reff3 reff 3");
     return parsedResult;
   }
 
@@ -235,8 +222,8 @@ class ISOMessageParsing {
     if (bit39 == '00') {
       // Jika bit39 == '00', langsung kembalikan hasil dari parseBit48
       if (bit48 != null) {
-        parseBit48(bit48);
-        return "Bit 39 == 00, Bit 48 diproses.";
+        return parseBit48(bit48, idpel);
+        // return bit48;
       } else {
         return "Bit 39 == 00 tetapi Bit 48 tidak tersedia.";
       }
@@ -261,7 +248,6 @@ class ISOMessageParsing {
       }
     }
   }
-
 
   static String hexToBinary(String hex) {
     StringBuffer binary = StringBuffer();
