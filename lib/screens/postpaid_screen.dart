@@ -113,7 +113,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                       height: 54,
                       child: ElevatedButton(
                         onPressed: _handleSubmit, // Panggil fungsi handleSubmit
-                        child: Text('Submit'),
+                        child: Text('Cek'),
                       ),
                     ),
                   ),
@@ -135,13 +135,72 @@ class _postpaid_screenState extends State<postpaid_screen> {
                     ),
                   ],
                 ),
-              SizedBox(height: 10),
-              Text(
-                'Output Response:' + _outputISOMessageParsing, // Tampilkan hasil output
-                style: TextStyle(fontSize: 16),
+              if (!_outputISOMessageParsing.isEmpty)
+              Container(
+                margin: const EdgeInsets.only(left: 20),
+                alignment: Alignment.centerLeft,
+                child: RichText(
+                  text: TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'PLN Postpaid \n',
+                        style: GoogleFonts.dongle(
+                          textStyle: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      TextSpan(
+                        text: '$_outputISOMessageParsing', // Tampilkan hasil output
+                        style: GoogleFonts.dongle(
+                          textStyle: const TextStyle(
+                            fontSize: 24,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              if (!_outputISOMessageParsing.isEmpty)
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: (){
+                          setState(() {
+                            _controller.clear();
+                            _outputISOMessageParsing = "";
+                          });
+                        },
+                        child: Text('Clear Data'),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Handle button press
+                        },
+                        child: Text('Booking No. Antrian'),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ));
+        )
+      );
   }
 }

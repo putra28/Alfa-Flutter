@@ -121,12 +121,12 @@ class _prepaid_screenState extends State<prepaid_screen> {
               ),           
               SizedBox(height: 10),
               Text(
-                'Output ISO Message:' + _outputISOMessage, // Tampilkan hasil output
+                'Output ISO Message:$_outputISOMessage', // Tampilkan hasil output
                 style: TextStyle(fontSize: 16),
               ),
               SizedBox(height: 10),
               Text(
-                'Output Response:' + _outputISOMessageParsing, // Tampilkan hasil output
+                'Output Response:$_outputISOMessageParsing', // Tampilkan hasil output
                 style: TextStyle(fontSize: 16),
               ),
             ],

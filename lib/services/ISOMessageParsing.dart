@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 class ISOMessageParsing {
   String printResponse(String idpel) {
     try {
@@ -102,118 +103,110 @@ class ISOMessageParsing {
     // 1. ID Pelanggan (13 karakter)
     String idPelanggan = bit48.substring(currentIndex, currentIndex + 12);
     currentIndex += 12;
-    parsedResult += "$idpel idpel\n";
 
     // 2. Jumlah Tagihan (3 karakter)
     String jumlahTagihan = bit48.substring(currentIndex, currentIndex + 3);
     currentIndex += 3;
-    parsedResult += "$jumlahTagihan jumlahTagihan\n";
 
     // 3. Scref (32 karakter)
     String scref = bit48.substring(currentIndex, currentIndex + 32);
     currentIndex += 32;
-    parsedResult += "$scref scref\n";
 
     // 4. Nama (20 karakter)
     String nama = bit48.substring(currentIndex, currentIndex + 25).trim();
     currentIndex += 25;
-    parsedResult += "$nama nama\n";
 
     // 5. Kode Unit (5 karakter)
     String kodeUnit = bit48.substring(currentIndex, currentIndex + 5);
     currentIndex += 5;
-    parsedResult += "$kodeUnit kodeUnit\n";
 
     // 6. Telepon Unit (16 karakter, jika kosong tetap dihitung)
     String teleponUnit =
         bit48.substring(currentIndex, currentIndex + 15).trim();
     currentIndex += 15;
-    parsedResult += "$teleponUnit teleponUnit\n";
 
     // 7. Tarif (2 karakter)
     String tarif = bit48.substring(currentIndex, currentIndex + 4).trim();
     currentIndex += 4;
-    parsedResult += "$tarif tarif\n";
 
     // 8. Daya (9 karakter)
     String daya = bit48.substring(currentIndex, currentIndex + 9);
     currentIndex += 9;
-    parsedResult += "$daya daya\n";
+    String cleanedDaya = daya.replaceFirst(RegExp(r'^0+'), '');
 
     // 9. Admin (9 karakter)
     String admin = bit48.substring(currentIndex, currentIndex + 9);
     currentIndex += 9;
-    parsedResult += "$admin admin\n";
+    String cleanedAdmin = admin.replaceFirst(RegExp(r'^0+'), '');
+    String formattedAdmin = cleanedAdmin.isNotEmpty ? cleanedAdmin : '0';
 
     // 10. Periode (6 karakter)
     String periode = bit48.substring(currentIndex, currentIndex + 6);
+    String tahun = periode.substring(0, 4);
+    String bulan = periode.substring(4, 6);
     currentIndex += 6;
-    parsedResult += "$periode periode\n";
 
     // 11. Tanggal Akhir (8 karakter)
     String tanggalAkhir = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    parsedResult += "$tanggalAkhir tanggalAkhir\n";
 
     // 12. Tanggal Baca (8 karakter)
     String tanggalBaca = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    parsedResult += "$tanggalBaca tanggalBaca\n";
 
     // 13. Tagihan (12 karakter)
     String tagihan = bit48.substring(currentIndex, currentIndex + 12);
     currentIndex += 12;
-    parsedResult += "$tagihan tagihan\n";
+    String cleanedTagihan = tagihan.replaceFirst(RegExp(r'^0+'), '');
 
     // 14. Kode Insentif (1 karakter)
     String kodeInsentif = bit48.substring(currentIndex, currentIndex + 1);
     currentIndex += 1;
-    parsedResult += "$kodeInsentif kodeInsentif\n";
 
     // 15. Insentif (10 karakter)
     String insentif = bit48.substring(currentIndex, currentIndex + 10);
     currentIndex += 10;
-    parsedResult += "$insentif insentif\n";
 
     // 16. Pajak (10 karakter)
     String pajak = bit48.substring(currentIndex, currentIndex + 10);
     currentIndex += 10;
-    parsedResult += "$pajak pajak\n";
 
     // 17. Denda (12 karakter)
     String denda = bit48.substring(currentIndex, currentIndex + 12);
     currentIndex += 12;
-    parsedResult += "$denda denda\n";
 
     // 18. Stand 1 Awal (8 karakter)
     String stand1Awal = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    parsedResult += "$stand1Awal stand1Awal\n";
 
     // 19. Stand 1 Akhir (8 karakter)
     String stand1Akhir = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    parsedResult += "$stand1Akhir stand1Akhir\n";
 
     // 20. Stand 2 Awal (8 karakter)
     String stand2Awal = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    parsedResult += "$stand2Awal perstand2Awaliode\n";
 
     // 21. Stand 2 Akhir (8 karakter)
     String stand2Akhir = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    parsedResult += "$stand2Akhir stand2Akhir\n";
 
     // 22. Reff 1 (10 karakter)
     String reff1 = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    parsedResult += "$reff1 reff1\n";
 
     // 23. Reff 2 (10 karakter)
     String reff2 = bit48.substring(currentIndex, currentIndex + 8);
     currentIndex += 8;
-    parsedResult += "$reff2 reff2\n";
+
+    parsedResult = "ID Pelanggan : $idpel\n"
+        "Nama : $nama\n"
+        "Tarif/Daya : $tarif/$cleanedDaya\n"
+        "Total Lembar Tagihan : $jumlahTagihan\n"
+        "Bulan / Tahun : $bulan / $tahun\n"
+        "RP TAG PLN : $periode\n"
+        "Admin Bank : Rp. $formattedAdmin\n"
+        "Total : Rp. $cleanedTagihan\n";
 
     return parsedResult;
   }
@@ -225,7 +218,8 @@ class ISOMessageParsing {
         return parseBit48(bit48, idpel);
         // return bit48;
       } else {
-        return "Bit 39 == 00 tetapi Bit 48 tidak tersedia.";
+        // return "Bit 39 == 00 tetapi Bit 48 tidak tersedia.";
+        return "Terjadi Kegagalan Saat Cek Data";
       }
     } else {
       // Kode yang ada sebelumnya

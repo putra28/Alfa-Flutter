@@ -14,7 +14,7 @@ class PostpaidBitmapTypes {
       // Mengisi tmpBitmap berdasarkan array bitmaps
       for (String s in bitmaps) {
         int index = int.parse(s) - 1;
-        tmpBitmap = tmpBitmap.substring(0, index) + "1" + tmpBitmap.substring(index + 1);
+        tmpBitmap = "${tmpBitmap.substring(0, index)}1${tmpBitmap.substring(index + 1)}";
       }
 
       // Memproses tmpBitmap dalam kelompok 4 bit
