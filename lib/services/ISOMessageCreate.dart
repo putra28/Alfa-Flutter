@@ -77,53 +77,48 @@ class Isomessagecreate {
 
   Future<String> sendISOMessage(String isoMessage) async {
     try {
-      // Coba koneksi ke server
+      // Hubungkan ke server
       final socket = await Socket.connect('168.168.10.175', 7100)
           .timeout(Duration(seconds: 5), onTimeout: () {
         throw Exception('Connection timed out');
       });
       print('Connected to the server.');
-
-      try {
-        // Kirim ISO message
-        socket.write(isoMessage);
-        await socket.flush();
-        print('ISO message sent.');
-
-        // Buffer untuk menyimpan respons
-        final responseBuffer = StringBuffer();
-
-        // Mendengarkan respons dari server
-        await socket.listen(
-          (data) {
-            // Tambahkan data yang diterima ke buffer
-            responseBuffer.write(String.fromCharCodes(data));
-          },
-          onDone: () {
-            print('Response received.');
-          },
-          onError: (error) {
-            throw Exception('Error occurred while receiving response: $error');
-          },
-        ).asFuture();
-
-        // Tutup koneksi setelah selesai
-        await socket.close();
-
-        // Jika respons kosong, anggap sebagai kegagalan menerima data
-        if (responseBuffer.isEmpty) {
-          throw Exception('No response received from server');
-        }
-
-        // Mengembalikan respons
-        return responseBuffer.toString();
-      } catch (e) {
-        print('Failed to receive response: $e');
-        return 'Error: Failed to receive response. $e';
+  
+      // Kirim ISO message
+      socket.write(isoMessage);
+      await socket.flush();
+      print('ISO message sent.');
+  
+      // Buffer untuk menerima respons dari server
+      final responseBuffer = StringBuffer();
+  
+      // Mendengarkan respons dari server
+      await socket.listen(
+        (data) {
+          // Tambahkan data yang diterima ke buffer
+          responseBuffer.write(String.fromCharCodes(data));
+        },
+        onDone: () {
+          print('Data fully received.');
+        },
+        onError: (error) {
+          throw Exception('Error occurred while receiving response: $error');
+        },
+      ).asFuture();
+  
+      // Tutup koneksi setelah selesai
+      await socket.close();
+  
+      // Jika respons kosong, lempar pengecualian
+      if (responseBuffer.isEmpty) {
+        throw Exception('No response received from server');
       }
+  
+      // Kembalikan respons sebagai string
+      return responseBuffer.toString();
     } catch (e) {
-      print('Failed to connect to the server: $e');
-      return 'Error: Failed to connect to the server. $e';
+      print('Error during communication: $e');
+      return 'Error: $e';
     }
   }
 }

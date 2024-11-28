@@ -1,4 +1,5 @@
 // lib/screens/postpaid_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/ISOMessageCreate.dart'; // Import file processor.dart
@@ -24,18 +25,22 @@ class _postpaid_screenState extends State<postpaid_screen> {
     final parsingISO =
         processorParsing.printResponse(_controller.text); // Proses input
 
-    setState(() {
-      _outputISOMessage = isoMessage; // Simpan ISO message yang dikirim
-      _outputISOMessageParsing =
-          parsingISO; // Status awal untuk parsing
-    });
+    // setState(() {
+    //   _outputISOMessage = isoMessage; // Simpan ISO message yang dikirim
+    //   _outputISOMessageParsing =
+    //       parsingISO; // Status awal untuk parsing
+    // });
 
     // Kirim ISO message ke server dan tunggu respons
-    // // String serverResponse = await processor.sendISOMessage(isoMessage);
-
-    // setState(() {
-    //   _outputISOMessageParsing = serverResponse; // Simpan respons dari server
-    // });
+    try {
+      String serverResponse = await processor.sendISOMessage(isoMessage);
+      print('Server Response: $serverResponse');
+      setState(() {
+        _outputISOMessageParsing = serverResponse; // Simpan respons dari server
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   @override
@@ -184,6 +189,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                       ),
                     ),
                   ),
+              if (!_outputISOMessageParsing.startsWith('Error:'))              
                   Expanded(
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 20),

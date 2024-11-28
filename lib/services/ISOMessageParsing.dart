@@ -1,9 +1,21 @@
 import 'package:intl/intl.dart';
+
 class ISOMessageParsing {
+
+  static List<String> bulanArray = [
+    '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'
+  ];
+
+  // PROSES DEFINISIKAN ISO RESPONSE
+  // PANJANG LOOPING SESUAI DENGAN PANJANG KARAKTER BIT48, TOTAL JUMLAH TAGIHAN
   String printResponse(String idpel) {
     try {
       String contohResponse =
-          "0210723A40010AC180000514501380000000000100100111510495800743410495811151116602116ALN32SATPZ01P3330000000000010054ALF0012010001451000002291738181571221002JTE210ZD9D542936A78FE11A4ECE07DDUMMY SAT PLN POSTPAID 2 17380               R1  0000009000000000002024110000000000000000000000100100D00000000000000000000000000000000000068150000693300000000000000000000000000000000360";
+          "0210723A40010AC180000514501380000000000100100111510495800743410495811151116602116ALN32SATPZ01P3330000000000010054ALF001201000145100000229" +
+          "1738181571221002JTE210ZD9D542936A78FE11A4ECE07DDUMMY SAT PLN POSTPAID 2 17380               R1  000000900000000000" + //Awalan Bit 48
+          "2024110000000000000000000000100100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
+          // "2024100000000000000000000000200100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
+          "360";
       // print("Contoh Response: $contohResponse");
       return parseISOResponse(contohResponse, idpel);
     } catch (e) {
@@ -13,10 +25,7 @@ class ISOMessageParsing {
     }
   }
 
-  static String coba(String isoMessage, String idpel) {
-    return idpel;
-  }
-
+  // PROSES DEFINISIKAN SETIAP BIT
   static String parseISOResponse(String isoMessage, String idpel) {
     // MTI (4 karakter pertama)
     String mti = isoMessage.substring(0, 4);
@@ -93,6 +102,7 @@ class ISOMessageParsing {
     }
   }
 
+  // PROSES PARSING BIT48 DAN RETURN VALUE
   static String parseBit48(String bit48, String idpel) {
     // print("Parsing Bit 48:");
 
@@ -105,11 +115,18 @@ class ISOMessageParsing {
     currentIndex += 12;
 
     // 2. Jumlah Tagihan (3 karakter)
-    String jumlahTagihan = bit48.substring(currentIndex, currentIndex + 3);
-    currentIndex += 3;
+    String jumlahTagihan = bit48.substring(currentIndex, currentIndex + 1);
+    currentIndex += 1;
+    int totalDataLooping = int.parse(jumlahTagihan);
+
+    // 2. Jumlah Tagihan (3 karakter)
+    String sisaTagihan = bit48.substring(currentIndex, currentIndex + 2);
+    currentIndex += 2;
+
+    // Jumlahkan Tagihan dengan sisa
+    int totalTagihan = int.parse(jumlahTagihan) + int.parse(sisaTagihan);
 
     // 3. Scref (32 karakter)
-    String scref = bit48.substring(currentIndex, currentIndex + 32);
     currentIndex += 32;
 
     // 4. Nama (20 karakter)
@@ -117,98 +134,70 @@ class ISOMessageParsing {
     currentIndex += 25;
 
     // 5. Kode Unit (5 karakter)
-    String kodeUnit = bit48.substring(currentIndex, currentIndex + 5);
     currentIndex += 5;
 
     // 6. Telepon Unit (16 karakter, jika kosong tetap dihitung)
-    String teleponUnit =
-        bit48.substring(currentIndex, currentIndex + 15).trim();
     currentIndex += 15;
 
     // 7. Tarif (2 karakter)
-    String tarif = bit48.substring(currentIndex, currentIndex + 4).trim();
     currentIndex += 4;
 
     // 8. Daya (9 karakter)
-    String daya = bit48.substring(currentIndex, currentIndex + 9);
     currentIndex += 9;
-    String cleanedDaya = daya.replaceFirst(RegExp(r'^0+'), '');
 
     // 9. Admin (9 karakter)
-    String admin = bit48.substring(currentIndex, currentIndex + 9);
+    // String admin = bit48.substring(currentIndex, currentIndex + 9);
+    int admin = 2500;
     currentIndex += 9;
-    String cleanedAdmin = admin.replaceFirst(RegExp(r'^0+'), '');
-    String formattedAdmin = cleanedAdmin.isNotEmpty ? cleanedAdmin : '0';
+    // String cleanedAdmin = admin.replaceFirst(RegExp(r'^0+'), '');
+    // String adminVal = cleanedAdmin.isNotEmpty ? cleanedAdmin : '0';
+    String formattedAdmin = NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(admin);
 
-    // 10. Periode (6 karakter)
-    String periode = bit48.substring(currentIndex, currentIndex + 6);
-    String tahun = periode.substring(0, 4);
-    String bulan = periode.substring(4, 6);
-    currentIndex += 6;
+    // 9. Data Looping (115 karakter)
+    List<String> dataLooping = [];
+    for (int i = 0; i < totalDataLooping; i++) {
+      String loopingData = bit48.substring(currentIndex, currentIndex + 115);
+      dataLooping.add(loopingData);
+      currentIndex += 115;
+    }
 
-    // 11. Tanggal Akhir (8 karakter)
-    String tanggalAkhir = bit48.substring(currentIndex, currentIndex + 8);
-    currentIndex += 8;
+    // Parsing setiap data looping
+    int totalTagihanLooping = 0; // Variabel untuk menjumlahkan semua tagihanlooping
+    int totalDendaLooping = 0; // Variabel untuk menjumlahkan semua dendalooping
+    for (String data in dataLooping) {
+      String periodelooping = data.substring(0, 6); // 6 karakter pertama
+      String tagihanlooping = data.substring(22, 34).replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
+      String dendalooping = data.substring(46, 58).replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
+      if (dendalooping.isEmpty) {
+        dendalooping = '0';
+      }
+      
+      totalTagihanLooping += int.parse(tagihanlooping); // Menjumlahkan tagihanlooping
+      totalDendaLooping += int.parse(dendalooping); // Menjumlahkan tagihanlooping
+    }
+    
+    // Hitung total dari semua tagihan dan denda looping
+    int RPTagPLN = totalTagihanLooping + totalDendaLooping;
+    String formattedRPTAG = NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(RPTagPLN);
 
-    // 12. Tanggal Baca (8 karakter)
-    String tanggalBaca = bit48.substring(currentIndex, currentIndex + 8);
-    currentIndex += 8;
+    int totalBayar = RPTagPLN + admin;
+    String formattedTotBay = NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(totalBayar);
 
-    // 13. Tagihan (12 karakter)
-    String tagihan = bit48.substring(currentIndex, currentIndex + 12);
-    currentIndex += 12;
-    String cleanedTagihan = tagihan.replaceFirst(RegExp(r'^0+'), '');
-
-    // 14. Kode Insentif (1 karakter)
-    String kodeInsentif = bit48.substring(currentIndex, currentIndex + 1);
-    currentIndex += 1;
-
-    // 15. Insentif (10 karakter)
-    String insentif = bit48.substring(currentIndex, currentIndex + 10);
-    currentIndex += 10;
-
-    // 16. Pajak (10 karakter)
-    String pajak = bit48.substring(currentIndex, currentIndex + 10);
-    currentIndex += 10;
-
-    // 17. Denda (12 karakter)
-    String denda = bit48.substring(currentIndex, currentIndex + 12);
-    currentIndex += 12;
-
-    // 18. Stand 1 Awal (8 karakter)
-    String stand1Awal = bit48.substring(currentIndex, currentIndex + 8);
-    currentIndex += 8;
-
-    // 19. Stand 1 Akhir (8 karakter)
-    String stand1Akhir = bit48.substring(currentIndex, currentIndex + 8);
-    currentIndex += 8;
-
-    // 20. Stand 2 Awal (8 karakter)
-    String stand2Awal = bit48.substring(currentIndex, currentIndex + 8);
-    currentIndex += 8;
-
-    // 21. Stand 2 Akhir (8 karakter)
-    String stand2Akhir = bit48.substring(currentIndex, currentIndex + 8);
-    currentIndex += 8;
-
-    // 22. Reff 1 (10 karakter)
-    String reff1 = bit48.substring(currentIndex, currentIndex + 8);
-    currentIndex += 8;
-
-    // 23. Reff 2 (10 karakter)
-    String reff2 = bit48.substring(currentIndex, currentIndex + 8);
-    currentIndex += 8;
-
+    // Ambil periodelooping pertama
+    String periodeLoopingPertama = dataLooping.isNotEmpty ? dataLooping[0].substring(0, 6) : '';
+    String bulan = periodeLoopingPertama.substring(4, 6); // 2 karakter terakhir
+    String bulanNama = bulanArray[int.parse(bulan)];
+    
+    String tahun = periodeLoopingPertama.substring(0, 4); // 4 karakter pertama
     parsedResult = "ID Pelanggan : $idpel\n"
-        "Nama : $nama\n"
-        "Tarif/Daya : $tarif/$cleanedDaya\n"
-        "Total Lembar Tagihan : $jumlahTagihan\n"
-        "Bulan / Tahun : $bulan / $tahun\n"
-        "RP TAG PLN : $periode\n"
-        "Admin Bank : Rp. $formattedAdmin\n"
-        "Total : Rp. $cleanedTagihan\n";
-
-    return parsedResult;
+            "Nama : $nama\n"
+            "Total Lembar Tagihan : $totalTagihan\n"
+            "BL / TH : $bulanNama / $tahun\n"
+            "RP TAG PLN : $formattedRPTAG\n"
+            "Admin Bank : $formattedAdmin\n"
+            "Total : $formattedTotBay\n";
+    
+    return parsedResult.trim(); // Menghilangkan spasi atau baris kosong di akhir
   }
 
   static String processResponseCode(String bit39, String idpel, String? bit48) {
