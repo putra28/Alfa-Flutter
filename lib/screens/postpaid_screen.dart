@@ -22,8 +22,9 @@ class _postpaid_screenState extends State<postpaid_screen> {
     final processorParsing = ISOMessageParsing(); // Buat instance Processor
     final isoMessage =
         processor.createIsoMessage(_controller.text); // Proses input
-    final parsingISO =
-        processorParsing.printResponse(_controller.text); // Proses input
+    final isoMessagetoSent = 'xx' + isoMessage;
+    // final parsingISO =
+    //     processorParsing.printResponse(_controller.text); // Proses input
 
     // setState(() {
     //   _outputISOMessage = isoMessage; // Simpan ISO message yang dikirim
@@ -33,10 +34,12 @@ class _postpaid_screenState extends State<postpaid_screen> {
 
     // Kirim ISO message ke server dan tunggu respons
     try {
-      String serverResponse = await processor.sendISOMessage(isoMessage);
+      String serverResponse = await processor.sendISOMessage(isoMessagetoSent);
       print('Server Response: $serverResponse');
+      final parsingISO =
+        processorParsing.printResponse(serverResponse, _controller.text); // Proses input
       setState(() {
-        _outputISOMessageParsing = serverResponse; // Simpan respons dari server
+        _outputISOMessageParsing = parsingISO; // Simpan respons dari server
       });
     } catch (e) {
       print('Error: $e');
@@ -128,7 +131,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
               if (_outputISOMessageParsing.isEmpty)
                 Column(
                   children: [
-                    Image.asset('assets/images/albi.png', width: 100, height: 100),
+                    Image.asset('assets/images/albi.png',
+                        width: 100, height: 100),
                     Text(
                       'Silahkan Masukkan ID Pelanggan Dengan Benar',
                       style: GoogleFonts.dongle(
@@ -141,72 +145,72 @@ class _postpaid_screenState extends State<postpaid_screen> {
                   ],
                 ),
               if (!_outputISOMessageParsing.isEmpty)
-              Container(
-                margin: const EdgeInsets.only(left: 20),
-                alignment: Alignment.centerLeft,
-                child: RichText(
-                  text: TextSpan(
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: 'PLN Postpaid \n',
-                        style: GoogleFonts.dongle(
-                          textStyle: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                Container(
+                  margin: const EdgeInsets.only(left: 20),
+                  alignment: Alignment.centerLeft,
+                  child: RichText(
+                    text: TextSpan(
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: 'PLN Postpaid \n',
+                          style: GoogleFonts.dongle(
+                            textStyle: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
-                      ),
-                      TextSpan(
-                        text: '$_outputISOMessageParsing', // Tampilkan hasil output
-                        style: GoogleFonts.dongle(
-                          textStyle: const TextStyle(
-                            fontSize: 24,
-                            color: Colors.black,
+                        TextSpan(
+                          text:
+                              '$_outputISOMessageParsing', // Tampilkan hasil output
+                          style: GoogleFonts.dongle(
+                            textStyle: const TextStyle(
+                              fontSize: 24,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
               SizedBox(height: 20),
               if (!_outputISOMessageParsing.isEmpty)
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                      height: 54,
-                      child: ElevatedButton(
-                        onPressed: (){
-                          setState(() {
-                            _controller.clear();
-                            _outputISOMessageParsing = "";
-                          });
-                        },
-                        child: Text('Clear Data'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        height: 54,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _controller.clear();
+                              _outputISOMessageParsing = "";
+                            });
+                          },
+                          child: Text('Clear Data'),
+                        ),
                       ),
                     ),
-                  ),
-              if (!_outputISOMessageParsing.startsWith('Error:'))              
-                  Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                      height: 54,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Handle button press
-                        },
-                        child: Text('Booking No. Antrian'),
+                    if (_outputISOMessageParsing.startsWith('ID'))
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Handle button press
+                            },
+                            child: Text('Booking No. Antrian'),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
-        )
-      );
+        ));
   }
 }

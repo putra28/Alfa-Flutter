@@ -78,7 +78,7 @@ class Isomessagecreate {
   Future<String> sendISOMessage(String isoMessage) async {
     try {
       // Hubungkan ke server
-      final socket = await Socket.connect('168.168.10.175', 7100)
+      final socket = await Socket.connect('168.168.10.175', 7005)
           .timeout(Duration(seconds: 5), onTimeout: () {
         throw Exception('Connection timed out');
       });
@@ -96,10 +96,12 @@ class Isomessagecreate {
       await socket.listen(
         (data) {
           // Tambahkan data yang diterima ke buffer
-          responseBuffer.write(String.fromCharCodes(data));
+          String responseChunk = String.fromCharCodes(data);
+          responseBuffer.write(responseChunk);
+          print('Received chunk: $responseChunk'); // Cetak data yang diterima (chunk)
         },
         onDone: () {
-          print('Data fully received.');
+          print('Data fully received: ${responseBuffer.toString()}'); // Cetak respons penuh setelah selesai
         },
         onError: (error) {
           throw Exception('Error occurred while receiving response: $error');

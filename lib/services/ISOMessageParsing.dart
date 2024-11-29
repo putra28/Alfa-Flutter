@@ -1,23 +1,34 @@
 import 'package:intl/intl.dart';
 
 class ISOMessageParsing {
-
   static List<String> bulanArray = [
-    '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'
+    '',
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MEI',
+    'JUN',
+    'JUL',
+    'AGS',
+    'SEP',
+    'OKT',
+    'NOV',
+    'DES'
   ];
 
   // PROSES DEFINISIKAN ISO RESPONSE
   // PANJANG LOOPING SESUAI DENGAN PANJANG KARAKTER BIT48, TOTAL JUMLAH TAGIHAN
-  String printResponse(String idpel) {
+  String printResponse(String serverResponse, String idpel) {
     try {
-      String contohResponse =
-          "0210723A40010AC180000514501380000000000100100111510495800743410495811151116602116ALN32SATPZ01P3330000000000010054ALF001201000145100000229" +
-          "1738181571221002JTE210ZD9D542936A78FE11A4ECE07DDUMMY SAT PLN POSTPAID 2 17380               R1  000000900000000000" + //Awalan Bit 48
-          "2024110000000000000000000000100100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
-          // "2024100000000000000000000000200100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
-          "360";
-      // print("Contoh Response: $contohResponse");
-      return parseISOResponse(contohResponse, idpel);
+      // String contohResponse =
+      //     "XX0210723A40010AC180000514501380000000000100100111510495800743410495811151116602116ALN32SATPZ01P3330000000000010054ALF001201000145100000229" +
+      //         "1738181571221002JTE210ZD9D542936A78FE11A4ECE07DDUMMY SAT PLN POSTPAID 2 17380               R1  000000900000000000" + //Awalan Bit 48
+      //         "2024110000000000000000000000100100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
+      //         // "2024100000000000000000000000200100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
+      //         "360";
+      // print("Contoh Response: $serverResponse");
+      return parseISOResponse(serverResponse, idpel);
     } catch (e) {
       // print("Failed to process response.");
       // print(e);
@@ -27,11 +38,12 @@ class ISOMessageParsing {
 
   // PROSES DEFINISIKAN SETIAP BIT
   static String parseISOResponse(String isoMessage, String idpel) {
+    String header = isoMessage.substring(0, 2);
     // MTI (4 karakter pertama)
-    String mti = isoMessage.substring(0, 4);
+    String mti = isoMessage.substring(2, 6);
 
     // Primary Bitmap (16 karakter setelah MTI)
-    String primaryBitmapHex = isoMessage.substring(4, 20);
+    String primaryBitmapHex = isoMessage.substring(6, 22);
 
     // Convert Primary Bitmap to Binary
     String primaryBitmapBinary = hexToBinary(primaryBitmapHex);
@@ -56,7 +68,7 @@ class ISOMessageParsing {
     };
 
     // Data Elements
-    int currentIndex = 20; // Setelah Primary Bitmap
+    int currentIndex = 22; // Setelah Primary Bitmap
     String? bit39; // Deklarasi untuk menyimpan Bit 39
     String? bit48; // Deklarasi untuk menyimpan Bit 48
     for (int bit = 1; bit <= primaryBitmapBinary.length; bit++) {
@@ -151,7 +163,6 @@ class ISOMessageParsing {
     currentIndex += 9;
     // String cleanedAdmin = admin.replaceFirst(RegExp(r'^0+'), '');
     // String adminVal = cleanedAdmin.isNotEmpty ? cleanedAdmin : '0';
-    String formattedAdmin = NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(admin);
 
     // 9. Data Looping (115 karakter)
     List<String> dataLooping = [];
@@ -162,42 +173,64 @@ class ISOMessageParsing {
     }
 
     // Parsing setiap data looping
-    int totalTagihanLooping = 0; // Variabel untuk menjumlahkan semua tagihanlooping
+    int totalTagihanLooping =
+        0; // Variabel untuk menjumlahkan semua tagihanlooping
     int totalDendaLooping = 0; // Variabel untuk menjumlahkan semua dendalooping
     for (String data in dataLooping) {
-      String periodelooping = data.substring(0, 6); // 6 karakter pertama
-      String tagihanlooping = data.substring(22, 34).replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
-      String dendalooping = data.substring(46, 58).replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
+      String tagihanlooping = data
+          .substring(22, 34)
+          .replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
+      String dendalooping = data
+          .substring(55, 67)
+          .replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
       if (dendalooping.isEmpty) {
         dendalooping = '0';
       }
-      
-      totalTagihanLooping += int.parse(tagihanlooping); // Menjumlahkan tagihanlooping
-      totalDendaLooping += int.parse(dendalooping); // Menjumlahkan tagihanlooping
+
+      totalTagihanLooping +=
+          int.parse(tagihanlooping); // Menjumlahkan tagihanlooping
+      totalDendaLooping +=
+          int.parse(dendalooping); // Menjumlahkan tagihanlooping
     }
-    
+
+    List<String> tahunList = dataLooping.map((e) => e.substring(0, 4)).toList();
+    List<String> bulanList = dataLooping.map((e) => e.substring(4, 6)).toList();
+    List<String> bulanNamaList =
+        bulanList.map((e) => bulanArray[int.parse(e)]).toList();
+    List<String> periodeLoopingList = List.generate(dataLooping.length,
+        (index) => "${bulanNamaList[index]}${tahunList[index]}");
+    // Menggabungkan elemen-elemen periodeLoopingList menjadi satu string dan menghapus karakter [ dan ]
+    String periodeLooping =
+        periodeLoopingList.toString().replaceAll(RegExp(r'[\[\]]'), '');
+    int totalPeriodeLooping = periodeLoopingList.length;
+
+    int totalAdmin = admin * totalPeriodeLooping;
+
+    String formattedAdmin =
+        NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
+            .format(totalAdmin);
+
     // Hitung total dari semua tagihan dan denda looping
     int RPTagPLN = totalTagihanLooping + totalDendaLooping;
-    String formattedRPTAG = NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(RPTagPLN);
+    String formattedRPTAG =
+        NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
+            .format(RPTagPLN);
 
-    int totalBayar = RPTagPLN + admin;
-    String formattedTotBay = NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(totalBayar);
+    int totalBayar = RPTagPLN + totalAdmin;
+    String formattedTotBay =
+        NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
+            .format(totalBayar);
 
-    // Ambil periodelooping pertama
-    String periodeLoopingPertama = dataLooping.isNotEmpty ? dataLooping[0].substring(0, 6) : '';
-    String bulan = periodeLoopingPertama.substring(4, 6); // 2 karakter terakhir
-    String bulanNama = bulanArray[int.parse(bulan)];
-    
-    String tahun = periodeLoopingPertama.substring(0, 4); // 4 karakter pertama
-    parsedResult = "ID Pelanggan : $idpel\n"
-            "Nama : $nama\n"
-            "Total Lembar Tagihan : $totalTagihan\n"
-            "BL / TH : $bulanNama / $tahun\n"
-            "RP TAG PLN : $formattedRPTAG\n"
-            "Admin Bank : $formattedAdmin\n"
-            "Total : $formattedTotBay\n";
-    
-    return parsedResult.trim(); // Menghilangkan spasi atau baris kosong di akhir
+    parsedResult = "IDPEL : $idpel\n"
+        "NAMA : $nama\n"
+        "TOTAL LEMBAR TAGIHAN : $totalTagihan\n"
+        "BL/TH : $periodeLooping\n"
+        "RP TAG PLN : $formattedRPTAG\n"
+        "ADMIN BANK : $formattedAdmin\n"
+        "TOTAL : $formattedTotBay\n";
+
+    return parsedResult
+        .trim(); // Menghilangkan spasi atau baris kosong di akhir
   }
 
   static String processResponseCode(String bit39, String idpel, String? bit48) {

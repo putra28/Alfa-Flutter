@@ -89,6 +89,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  dart_odbc:
+    dependency: "direct main"
+    description:
+      name: dart_odbc
+      sha256: "7048dbcb99133d2ea440fd62469e00d17fd19524cb5e3a22b1d039eb16a3e9ed"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.2+1"
   drawerbehavior:
     dependency: "direct main"
     description:
@@ -106,7 +114,7 @@ packages:
     source: hosted
     version: "1.3.1"
   ffi:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: ffi
       sha256: "16ed7b077ef01ad6170a3d0c57caa4a112a38d7a2ed5602e0aca9ca6f3d98da6"
