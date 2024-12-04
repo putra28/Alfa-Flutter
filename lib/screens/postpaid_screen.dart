@@ -36,11 +36,21 @@ class _postpaid_screenState extends State<postpaid_screen> {
     try {
       String serverResponse = await processor.sendISOMessage(isoMessagetoSent);
       print('Server Response: $serverResponse');
-      final parsingISO =
-        processorParsing.printResponse(serverResponse, _controller.text); // Proses input
-      setState(() {
-        _outputISOMessageParsing = parsingISO; // Simpan respons dari server
-      });
+      // Periksa apakah serverResponse tidak dimulai dengan "Error"
+      if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+        // Proses hasil parsing hanya jika tidak ada error
+        final parsingISO = processorParsing.printResponse(serverResponse, _controller.text);
+
+        // Perbarui state dengan hasil parsing
+        setState(() {
+          _outputISOMessageParsing = serverResponse; // Simpan hasil parsing ke state
+        });
+      } else {
+        // Tampilkan pesan error jika serverResponse dimulai dengan "Error"
+        setState(() {
+          _outputISOMessageParsing = serverResponse; // Simpan error ke state
+        });
+      }
     } catch (e) {
       print('Error: $e');
     }
@@ -146,8 +156,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                 ),
               if (!_outputISOMessageParsing.isEmpty)
                 Container(
-                  margin: const EdgeInsets.only(left: 20),
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.center,
                   child: RichText(
                     text: TextSpan(
                       children: <TextSpan>[
@@ -173,6 +182,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                         ),
                       ],
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               SizedBox(height: 20),

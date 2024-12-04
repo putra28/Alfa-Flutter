@@ -80,7 +80,7 @@ class Isomessagecreate {
       // Hubungkan ke server
       final socket = await Socket.connect('168.168.10.175', 7005)
           .timeout(Duration(seconds: 5), onTimeout: () {
-        throw Exception('Connection timed out');
+        throw Exception('Gagal terkoneksi dengan server');
       });
       print('Connected to the server.');
   
@@ -104,7 +104,7 @@ class Isomessagecreate {
           print('Data fully received: ${responseBuffer.toString()}'); // Cetak respons penuh setelah selesai
         },
         onError: (error) {
-          throw Exception('Error occurred while receiving response: $error');
+          throw Exception('Gagal saat memproses data: $error');
         },
       ).asFuture();
   
@@ -113,14 +113,16 @@ class Isomessagecreate {
   
       // Jika respons kosong, lempar pengecualian
       if (responseBuffer.isEmpty) {
-        throw Exception('No response received from server');
+        throw Exception('Server tidak merespon');
       }
   
       // Kembalikan respons sebagai string
       return responseBuffer.toString();
     } catch (e) {
-      print('Error during communication: $e');
-      return 'Error: $e';
+      // Hapus prefix "Exception: " dari pesan error
+      String errorMessage = e.toString().replaceFirst("Exception: ", "");
+      print('Terjadi kesalahan: $errorMessage');
+      return 'Terjadi Kesalahan: $errorMessage';
     }
   }
 }
