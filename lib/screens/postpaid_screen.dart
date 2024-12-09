@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/ISOMessageCreate.dart'; // Import file processor.dart
-import '../services/ISOMessageParsing.dart'; // Import file untuk ISOMessageParsing
+import '../services/ISOMessageCreate.dart';
+import '../services/Postpaid_ISOMessageParsing.dart';
 
 class postpaid_screen extends StatefulWidget {
   const postpaid_screen({super.key});
@@ -14,41 +14,26 @@ class postpaid_screen extends StatefulWidget {
 
 class _postpaid_screenState extends State<postpaid_screen> {
   final TextEditingController _controller = TextEditingController();
-  String _outputISOMessage = ""; // Variabel untuk menyimpan output
-  String _outputISOMessageParsing = ""; // Variabel untuk menyimpan output
+  String _outputISOMessage = "";
+  String _outputISOMessageParsing = "";
 
   void _handleSubmit() async {
-    final processor = Isomessagecreate(); // Buat instance Processor
-    final processorParsing = ISOMessageParsing(); // Buat instance Processor
-    final isoMessage =
-        processor.createIsoMessage(_controller.text); // Proses input
+    final processor = Isomessagecreate();
+    final processorParsing = ISOMessageParsing();
+    final isoMessage = processor.createIsoMessage(_controller.text);
     final isoMessagetoSent = 'xx' + isoMessage;
-    // final parsingISO =
-    //     processorParsing.printResponse(_controller.text); // Proses input
 
-    // setState(() {
-    //   _outputISOMessage = isoMessage; // Simpan ISO message yang dikirim
-    //   _outputISOMessageParsing =
-    //       parsingISO; // Status awal untuk parsing
-    // });
-
-    // Kirim ISO message ke server dan tunggu respons
     try {
       String serverResponse = await processor.sendISOMessage(isoMessagetoSent);
       print('Server Response: $serverResponse');
-      // Periksa apakah serverResponse tidak dimulai dengan "Error"
       if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-        // Proses hasil parsing hanya jika tidak ada error
         final parsingISO = processorParsing.printResponse(serverResponse, _controller.text);
-
-        // Perbarui state dengan hasil parsing
         setState(() {
-          _outputISOMessageParsing = serverResponse; // Simpan hasil parsing ke state
+          _outputISOMessageParsing = serverResponse;
         });
       } else {
-        // Tampilkan pesan error jika serverResponse dimulai dengan "Error"
         setState(() {
-          _outputISOMessageParsing = serverResponse; // Simpan error ke state
+          _outputISOMessageParsing = serverResponse;
         });
       }
     } catch (e) {
@@ -68,7 +53,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                 padding: const EdgeInsets.only(left: 15.0),
                 child: Image.asset(
                   'assets/images/logo_alfamart_white.png',
-                  width: 100,
+                  width: MediaQuery.of(context).size.width * 0.25,
                 ),
               ),
               Padding(
@@ -95,7 +80,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 child: Image.asset(
                   'assets/images/widthBanner.png',
-                  width: double.infinity,
+                  width: MediaQuery.of(context).size.width,
                 ),
               ),
               SizedBox(height: 20),
@@ -130,7 +115,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                       margin: const EdgeInsets.only(right: 20),
                       height: 54,
                       child: ElevatedButton(
-                        onPressed: _handleSubmit, // Panggil fungsi handleSubmit
+                        onPressed: _handleSubmit,
                         child: Text('Cek'),
                       ),
                     ),
@@ -157,6 +142,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
               if (!_outputISOMessageParsing.isEmpty)
                 Container(
                   alignment: Alignment.center,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: RichText(
                     text: TextSpan(
                       children: <TextSpan>[
@@ -171,8 +157,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                           ),
                         ),
                         TextSpan(
-                          text:
-                              '$_outputISOMessageParsing', // Tampilkan hasil output
+                          text: '$_outputISOMessageParsing',
                           style: GoogleFonts.dongle(
                             textStyle: const TextStyle(
                               fontSize: 24,
@@ -221,6 +206,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
                 ),
             ],
           ),
-        ));
+        )
+      );
   }
 }
+

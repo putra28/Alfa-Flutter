@@ -37,7 +37,7 @@ def insert_noantrian():
     try:
         # Ambil data dari request body JSON
         payload = request.get_json()
-        method = payload.get('method')
+        method = payload.get('product')
         data = payload.get('data')
 
         # Validasi method
@@ -89,47 +89,54 @@ def insert_noantrian():
             -- Contoh SQL untuk Antrian Prepaid (saat ini sama)
             INSERT INTO M_NOANTRIAN (
                 TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
-            ) 
+            )
             SELECT 
-                TO_CHAR(SYSDATE,'YYYYMMDD') TGL,
-                :idtoko KDTOKO,
-                '22201' PRODUCT_ID,
-                '1' DENOM_ID,
-                :amount AMOUNT,
-                (SELECT DECODE(Q1.NOANTRIAN, '', 1, Q1.NOANTRIAN + 1) NOANTRIAN
-                 FROM (
-                     SELECT SUM(1) NOANTRIAN 
-                     FROM M_NOANTRIAN
-                     WHERE TANGGAL = TO_CHAR(SYSDATE,'YYYYMMDD') AND KDTOKO = :idtoko
-                 ) Q1) NOANTRIAN,
-                :idpel IDPEL,
-                :rptag TAGIHAN,
-                :admttl ADMIN,
-                :lop LBR
-            FROM DUAL
+                Q1.TGL, Q1.KDTOKO, Q1.PRODUCT_ID, Q2.ITEMID, Q1.AMOUNT, Q1.NOANTRIAN, Q1.IDPEL, Q1.TAGIHAN, Q1.ADM, Q1.LBR
+            FROM (
+                SELECT 
+                    TO_CHAR(SYSDATE, 'YYYYMMDD') TGL,
+                    :idtoko KDTOKO,
+                    '11102' PRODUCT_ID,
+                    :denom DENOM_ID,
+                    (':denom' + '0') AMOUNT,
+                    (SELECT DECODE(Q1.NOANTRIAN, '', 1, Q1.NOANTRIAN + 1) NOANTRIAN 
+                     FROM (
+                         SELECT SUM(1) NOANTRIAN 
+                         FROM M_NOANTRIAN 
+                         WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = '$idtoko'
+                     ) Q1) NOANTRIAN,
+                    :idpel IDPEL,
+                    (':denom' - ':adm') TAGIHAN,
+                    :admttl ADM,
+                    '1' LBR
+                FROM DUAL
+            ) Q1
+            LEFT JOIN (
+                SELECT ITEMID, ITEMVALUE DENOM_ID 
+                FROM M_SUBPRODUK
+            ) Q2 ON Q1.DENOM_ID = Q2.DENOM_ID
             """
         elif method == "Antrian Nontaglis":
-            sql = """
-            -- Contoh SQL untuk Antrian Nontaglis (saat ini sama)
+            sql = f"""
             INSERT INTO M_NOANTRIAN (
                 TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
             ) 
             SELECT 
                 TO_CHAR(SYSDATE,'YYYYMMDD') TGL,
-                :idtoko KDTOKO,
-                '33301' PRODUCT_ID,
-                '2' DENOM_ID,
-                :amount AMOUNT,
+                '{idtoko}' KDTOKO,
+                '11104' PRODUCT_ID,
+                '0' DENOM_ID,
+                '{amount}' AMOUNT,
                 (SELECT DECODE(Q1.NOANTRIAN, '', 1, Q1.NOANTRIAN + 1) NOANTRIAN
                  FROM (
                      SELECT SUM(1) NOANTRIAN 
                      FROM M_NOANTRIAN
-                     WHERE TANGGAL = TO_CHAR(SYSDATE,'YYYYMMDD') AND KDTOKO = :idtoko
+                     WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = '{idtoko}'
                  ) Q1) NOANTRIAN,
-                :idpel IDPEL,
-                :rptag TAGIHAN,
-                :admttl ADMIN,
-                :lop LBR
+                '{idpel}' IDPEL,
+                '{rptag}' TAGIHAN,
+                '{admttl}' ADMIN,
+                '1' LBR
             FROM DUAL
             """
         else:
