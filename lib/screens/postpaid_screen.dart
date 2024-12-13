@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/ISOMessageCreate.dart';
 import '../services/Postpaid_ISOMessageParsing.dart';
+import 'package:quickalert/quickalert.dart';
 
 class postpaid_screen extends StatefulWidget {
   const postpaid_screen({super.key});
@@ -18,31 +19,57 @@ class _postpaid_screenState extends State<postpaid_screen> {
   String _outputISOMessageParsing = "";
 
   void _handleSubmit() async {
-    final processor = Isomessagecreate();
-    final processorParsing = ISOMessageParsing();
-    final isoMessage = processor.createIsoMessage(_controller.text);
-    final isoMessagetoSent = 'xx' + isoMessage;
+    if (_controller.text.isEmpty) {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Terjadi Kesalahan',
+        text: 'ID Pelanggan Perlu Diisi',
+        confirmBtnText: 'OK',
+        confirmBtnColor: Theme.of(context).colorScheme.primary,
+      );
+      return;
+    } 
+    else {
+      final processor = Isomessagecreate();
+      final processorParsing = ISOMessageParsing();
+      final isoMessage = processor.createIsoMessage(_controller.text);
+      final isoMessagetoSent = 'xx' + isoMessage;
 
-    try {
-      String serverResponse = await processor.sendISOMessage(isoMessagetoSent);
-      print('Server Response: $serverResponse');
-      if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-        final parsingISO = processorParsing.printResponse(serverResponse, _controller.text);
-        setState(() {
-          _outputISOMessageParsing = serverResponse;
-        });
-      } else {
-        setState(() {
-          _outputISOMessageParsing = serverResponse;
-        });
+      try {
+        String serverResponse =
+            await processor.sendISOMessage(isoMessagetoSent);
+        print('Server Response: $serverResponse');
+        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+          final parsingISO =
+              processorParsing.printResponse(serverResponse, _controller.text);
+          setState(() {
+            _outputISOMessageParsing = parsingISO;
+          });
+        } else {
+          String serverResponseClean =
+              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'Terjadi Kesalahan',
+            text: serverResponseClean,
+            confirmBtnText: 'OK',
+            confirmBtnColor: Theme.of(context).colorScheme.primary,
+          );
+          _controller.clear();
+        }
+      } catch (e) {
+        print('Error: $e');
       }
-    } catch (e) {
-      print('Error: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
         appBar: AppBar(
           titleSpacing: 0,
@@ -50,19 +77,19 @@ class _postpaid_screenState extends State<postpaid_screen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 15.0),
+                padding: EdgeInsets.only(left: width * 0.04),
                 child: Image.asset(
                   'assets/images/logo_alfamart_white.png',
-                  width: MediaQuery.of(context).size.width * 0.25,
+                  width: width * 0.20,
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 15.0),
+                padding: EdgeInsets.only(right: width * 0.04),
                 child: Text(
                   "Layanan Informasi Tagihan PLN",
                   style: GoogleFonts.dongle(
-                    textStyle: const TextStyle(
-                      fontSize: 28,
+                    textStyle: TextStyle(
+                      fontSize: width * 0.05,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -75,20 +102,20 @@ class _postpaid_screenState extends State<postpaid_screen> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 20),
+              SizedBox(height: height * 0.02),
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
+                margin: EdgeInsets.symmetric(horizontal: width * 0.05),
                 child: Image.asset(
                   'assets/images/widthBanner.png',
-                  width: MediaQuery.of(context).size.width,
+                  width: double.infinity,
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: height * 0.02),
               Text(
                 'Masukkan ID Pelanggan',
                 style: GoogleFonts.dongle(
-                  textStyle: const TextStyle(
-                    fontSize: 36,
+                  textStyle: TextStyle(
+                    fontSize: width * 0.07,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -99,7 +126,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                   Expanded(
                     flex: 7,
                     child: Container(
-                      margin: const EdgeInsets.only(left: 20),
+                      margin: EdgeInsets.only(left: width * 0.05),
                       child: TextField(
                         controller: _controller,
                         decoration: InputDecoration(
@@ -112,7 +139,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                   Expanded(
                     flex: 3,
                     child: Container(
-                      margin: const EdgeInsets.only(right: 20),
+                      margin: EdgeInsets.only(right: width * 0.05),
                       height: 54,
                       child: ElevatedButton(
                         onPressed: _handleSubmit,
@@ -122,17 +149,17 @@ class _postpaid_screenState extends State<postpaid_screen> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              SizedBox(height: height * 0.02),
               if (_outputISOMessageParsing.isEmpty)
                 Column(
                   children: [
                     Image.asset('assets/images/albi.png',
-                        width: 100, height: 100),
+                        width: width * 0.20, height: width * 0.20),
                     Text(
                       'Silahkan Masukkan ID Pelanggan Dengan Benar',
                       style: GoogleFonts.dongle(
-                        textStyle: const TextStyle(
-                          fontSize: 24,
+                        textStyle: TextStyle(
+                          fontSize: width * 0.05,
                           color: Colors.black,
                         ),
                       ),
@@ -142,15 +169,15 @@ class _postpaid_screenState extends State<postpaid_screen> {
               if (!_outputISOMessageParsing.isEmpty)
                 Container(
                   alignment: Alignment.center,
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  margin: EdgeInsets.symmetric(horizontal: width * 0.05),
                   child: RichText(
                     text: TextSpan(
                       children: <TextSpan>[
                         TextSpan(
                           text: 'PLN Postpaid \n',
                           style: GoogleFonts.dongle(
-                            textStyle: const TextStyle(
-                              fontSize: 24,
+                            textStyle: TextStyle(
+                              fontSize: width * 0.06,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -159,8 +186,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
                         TextSpan(
                           text: '$_outputISOMessageParsing',
                           style: GoogleFonts.dongle(
-                            textStyle: const TextStyle(
-                              fontSize: 24,
+                            textStyle: TextStyle(
+                              fontSize: width * 0.05,
                               color: Colors.black,
                             ),
                           ),
@@ -170,14 +197,14 @@ class _postpaid_screenState extends State<postpaid_screen> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-              SizedBox(height: 20),
+              SizedBox(height: height * 0.01),
               if (!_outputISOMessageParsing.isEmpty)
                 Row(
                   children: [
                     Expanded(
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        height: 54,
+                        margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                        height: height * 0.07,
                         child: ElevatedButton(
                           onPressed: () {
                             setState(() {
@@ -189,25 +216,22 @@ class _postpaid_screenState extends State<postpaid_screen> {
                         ),
                       ),
                     ),
-                    if (_outputISOMessageParsing.startsWith('ID'))
-                      Expanded(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          height: 54,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Handle button press
-                            },
-                            child: Text('Booking No. Antrian'),
-                          ),
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                        height: height * 0.07,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Handle button press
+                          },
+                          child: Text('Booking No. Antrian'),
                         ),
                       ),
+                    ),
                   ],
                 ),
             ],
           ),
-        )
-      );
+        ));
   }
 }
-

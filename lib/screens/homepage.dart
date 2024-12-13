@@ -22,14 +22,15 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 15.0),
+              padding: EdgeInsets.only(left: width * 0.04),
               child: Image.asset(
                 'assets/images/logo_alfamart_white.png',
                 width: width * 0.2,
+                height: height * 0.2,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(right: 15.0),
+              padding: EdgeInsets.only(right: width * 0.04),
               child: Text(
                 "Layanan Informasi Tagihan PLN",
                 style: GoogleFonts.dongle(

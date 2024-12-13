@@ -6,6 +6,7 @@ import 'screens/loading_screen.dart';
 import 'screens/postpaid_screen.dart';
 import 'screens/prepaid_screen.dart';
 import 'screens/nontaglis_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -64,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) { // Pastikan widget masih terpasang
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => const Login()),
         );
       }
     });

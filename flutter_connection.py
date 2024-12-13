@@ -1,6 +1,8 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from datetime import datetime
+from collections import OrderedDict
 import cx_Oracle
+import json
 
 app = Flask(__name__)
 
@@ -32,20 +34,17 @@ password = "TERANOVA"
 #         error, = e.args
 #         return jsonify({"status": "error", "message": error.message})
         
-@app.route('/api/insert-antrian', methods=['POST'])
-def insert_noantrian():
+@app.route('/api/link-alfa', methods=['POST'])
+def link_alfa():
     try:
         # Ambil data dari request body JSON
         payload = request.get_json()
-        method = payload.get('product')
+        method = payload.get('method')
         data = payload.get('data')
 
-        # Validasi method
-        if not method or not data:
-            return jsonify({"status": "error", "message": "Parameter 'method' dan 'data' harus diisi!"}), 400
 
         # Ambil data dari 'data' JSON
-        idtoko = data.get('var_idtoko')
+        kdtoko = data.get('var_kdtoko')
         amount = data.get('var_amount')
         idpel = data.get('var_idpel')
         rptag = data.get('var_rptag')
@@ -53,22 +52,26 @@ def insert_noantrian():
         lop = data.get('var_lembar')
 
         # Validasi data input
-        if not all([idtoko, amount, idpel, rptag, admttl, lop]):
-            return jsonify({"status": "error", "message": "Semua parameter di dalam 'data' harus diisi!"}), 400
+        if method != "Get Denom Prepaid":
+            # Validasi method
+            if not method or not data:
+                return jsonify({"status": "error", "message": "Parameter 'method' dan 'data' harus diisi!"}), 400
+            if not all([kdtoko, amount, idpel, rptag, admttl, lop]):
+                return jsonify({"status": "error", "message": "Semua parameter di dalam 'data' harus diisi!"}), 400
 
         # Membuka koneksi ke database
         connection = cx_Oracle.connect(user=username, password=password, dsn=dsn)
         cursor = connection.cursor()
 
         # Pilih SQL berdasarkan method
-        if method == "Antrian Postpaid":
+        if method == "Insert Antrian Postpaid":
             sql = """
             INSERT INTO M_NOANTRIAN (
                 TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
             ) 
             SELECT 
                 TO_CHAR(SYSDATE,'YYYYMMDD') TGL,
-                :idtoko KDTOKO,
+                :kdtoko KDTOKO,
                 '11101' PRODUCT_ID,
                 '0' DENOM_ID,
                 :amount AMOUNT,
@@ -76,7 +79,7 @@ def insert_noantrian():
                  FROM (
                      SELECT SUM(1) NOANTRIAN 
                      FROM M_NOANTRIAN
-                     WHERE TANGGAL = TO_CHAR(SYSDATE,'YYYYMMDD') AND KDTOKO = :idtoko
+                     WHERE TANGGAL = TO_CHAR(SYSDATE,'YYYYMMDD') AND KDTOKO = :kdtoko
                  ) Q1) NOANTRIAN,
                 :idpel IDPEL,
                 :rptag TAGIHAN,
@@ -84,7 +87,7 @@ def insert_noantrian():
                 :lop LBR
             FROM DUAL
             """
-        elif method == "Antrian Prepaid":
+        elif method == "Insert Antrian Prepaid":
             sql = """
             -- Contoh SQL untuk Antrian Prepaid (saat ini sama)
             INSERT INTO M_NOANTRIAN (
@@ -95,7 +98,7 @@ def insert_noantrian():
             FROM (
                 SELECT 
                     TO_CHAR(SYSDATE, 'YYYYMMDD') TGL,
-                    :idtoko KDTOKO,
+                    :kdtoko KDTOKO,
                     '11102' PRODUCT_ID,
                     :denom DENOM_ID,
                     (':denom' + '0') AMOUNT,
@@ -103,7 +106,7 @@ def insert_noantrian():
                      FROM (
                          SELECT SUM(1) NOANTRIAN 
                          FROM M_NOANTRIAN 
-                         WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = '$idtoko'
+                         WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = '$kdtoko'
                      ) Q1) NOANTRIAN,
                     :idpel IDPEL,
                     (':denom' - ':adm') TAGIHAN,
@@ -116,14 +119,14 @@ def insert_noantrian():
                 FROM M_SUBPRODUK
             ) Q2 ON Q1.DENOM_ID = Q2.DENOM_ID
             """
-        elif method == "Antrian Nontaglis":
+        elif method == "Insert Antrian Nontaglis":
             sql = f"""
             INSERT INTO M_NOANTRIAN (
                 TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
             ) 
             SELECT 
                 TO_CHAR(SYSDATE,'YYYYMMDD') TGL,
-                '{idtoko}' KDTOKO,
+                '{kdtoko}' KDTOKO,
                 '11104' PRODUCT_ID,
                 '0' DENOM_ID,
                 '{amount}' AMOUNT,
@@ -131,7 +134,7 @@ def insert_noantrian():
                  FROM (
                      SELECT SUM(1) NOANTRIAN 
                      FROM M_NOANTRIAN
-                     WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = '{idtoko}'
+                     WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = '{kdtoko}'
                  ) Q1) NOANTRIAN,
                 '{idpel}' IDPEL,
                 '{rptag}' TAGIHAN,
@@ -139,12 +142,39 @@ def insert_noantrian():
                 '1' LBR
             FROM DUAL
             """
+        elif method == "Get Denom Prepaid":
+            # Query untuk mendapatkan data denom dari tabel M_SUBPRODUK
+            sql = """
+            SELECT ITEMID, ITEMVALUE
+            FROM M_SUBPRODUK
+            """
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            # Format hasil ke dalam bentuk JSON
+            denom_list = [{"itemid": row[0], "itemvalue": int(row[1])} for row in result]
+
+            # Urutkan berdasarkan itemvalue dari terkecil ke terbesar
+            denom_list_sorted = sorted(denom_list, key=lambda x: x['itemvalue'])
+
+            # Tutup koneksi
+            cursor.close()
+            connection.close()
+
+            denom_response = OrderedDict({
+                "status": "success",
+                "message": "Data denom berhasil diambil dan diurutkan.",
+                "datetime": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "data": denom_list_sorted,
+            })
+            denom_json = json.dumps(denom_response, ensure_ascii=False, indent=4)
+            return Response(denom_json, content_type='application/json', status=200)
         else:
             return jsonify({"status": "error", "message": "Method tidak dikenali!"}), 400
 
         # Eksekusi SQL
         cursor.execute(sql, {
-            'idtoko': idtoko,
+            'kdtoko': kdtoko,
             'amount': amount,
             'idpel': idpel,
             'rptag': rptag,
