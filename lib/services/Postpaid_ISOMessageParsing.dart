@@ -21,7 +21,7 @@ class ISOMessageParsing {
   // PANJANG LOOPING SESUAI DENGAN PANJANG KARAKTER BIT48, TOTAL JUMLAH TAGIHAN
   String printResponse(String serverResponse, String idpel) {
     try {
-      // String contohResponse =
+      // String serverResponse =
       //     "XX0210723A40010AC180000514501380000000000100100111510495800743410495811151116602116ALN32SATPZ01P3330000000000010054ALF001201000145100000229" +
       //         "1738181571221002JTE210ZD9D542936A78FE11A4ECE07DDUMMY SAT PLN POSTPAID 2 17380               R1  000000900000000000" + //Awalan Bit 48
       //         "2024110000000000000000000000100100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
@@ -115,7 +115,7 @@ class ISOMessageParsing {
   }
 
   // PROSES PARSING BIT48 DAN RETURN VALUE
-  static String parseBit48(String bit48, String idpel) {
+  static List<dynamic> parseBit48(String bit48, String idpel) {
     // print("Parsing Bit 48:");
 
     // Mulai parsing data berdasarkan struktur
@@ -221,46 +221,68 @@ class ISOMessageParsing {
         NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
             .format(totalBayar);
 
-    parsedResult = "IDPEL : $idpel\n"
-        "NAMA : $nama\n"
-        "TOTAL LEMBAR TAGIHAN : $totalTagihan\n"
-        "BL/TH : $periodeLooping\n"
-        "RP TAG PLN : $formattedRPTAG\n"
-        "ADMIN BANK : $formattedAdmin\n"
-        "TOTAL : $formattedTotBay\n";
+    // parsedResult = "IDPEL : $idpel\n"
+    //     "NAMA : $nama\n"
+    //     "TOTAL LEMBAR TAGIHAN : $totalTagihan\n"
+    //     "BL/TH : $periodeLooping\n"
+    //     "RP TAG PLN : $formattedRPTAG\n"
+    //     "ADMIN BANK : $formattedAdmin\n"
+    //     "TOTAL : $formattedTotBay\n";
 
-    return parsedResult
-        .trim(); // Menghilangkan spasi atau baris kosong di akhir
+    // return parsedResult
+    //     .trim(); // Menghilangkan spasi atau baris kosong di akhir
+    return [
+      nama,               // Nama pelanggan
+      totalTagihan,       // Total tagihan
+      periodeLooping,     // Periode looping (contoh: "JAN2024, FEB2024")
+      formattedRPTAG,     // Format rupiah untuk tagihan PLN
+      formattedAdmin,     // Format rupiah untuk admin bank
+      formattedTotBay     // Format total bayar
+    ];
   }
 
   static String processResponseCode(String bit39, String idpel, String? bit48) {
     if (bit39 == '00') {
       // Jika bit39 == '00', langsung kembalikan hasil dari parseBit48
       if (bit48 != null) {
-        return parseBit48(bit48, idpel);
-        // return bit48;
+        // return parseBit48(bit48, idpel);
+        List<dynamic> result = parseBit48(bit48, idpel);
+        String nama = result[0];
+        int totalTagihan = result[1];
+        String periodeLooping = result[2];
+        String formattedRPTAG = result[3];
+        String formattedAdmin = result[4];
+        String formattedTotBay = result[5];
+        return "IDPEL: $idpel\n"
+               "NAMA: $nama\n"
+               "TOTAL TAGIHAN: $totalTagihan\n"
+               "BL/TH: $periodeLooping\n"
+               "RP TAG PLN: $formattedRPTAG\n"
+               "ADMIN BANK: $formattedAdmin\n"
+               "TOTAL BAYAR: $formattedTotBay\n";
+          // return bit48;
       } else {
         // return "Bit 39 == 00 tetapi Bit 48 tidak tersedia.";
-        return "Terjadi Kegagalan Saat Cek Data";
+        return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
       }
     } else {
       // Kode yang ada sebelumnya
       switch (bit39) {
         case '14':
-          return 'IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+          return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
         case '82':
-          return 'TAGIHAN BULAN BERJALAN BELUM TERSEDIA';
+          return 'Terjadi Kesalahan: TAGIHAN BULAN BERJALAN BELUM TERSEDIA';
         case '90':
-          return 'TRANSAKSI CUT OFF';
+          return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
         case '63':
         case '16':
-          return 'KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
+          return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
         case '34':
-          return 'TAGIHAN SUDAH TERBAYAR';
+          return 'Terjadi Kesalahan: TAGIHAN SUDAH TERBAYAR';
         case '18':
-          return 'TIMEOUT';
+          return 'Terjadi Kesalahan: TIMEOUT';
         default:
-          return "Kode Bit 39 tidak dikenali.";
+          return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
       }
     }
   }

@@ -3,7 +3,7 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/ISOMessageCreate.dart'; // Import file processor.dart
+import '../services/Prepaid_ISOMessageCreate.dart'; // Import file processor.dart
 import '../services/Prepaid_ISOMessageParsing.dart'; // Import file untuk ISOMessageParsing
 import '../widgets/CustomRadioWidget.dart';
 import 'package:quickalert/quickalert.dart';
@@ -57,39 +57,53 @@ class _prepaid_screenState extends State<prepaid_screen> {
       final processor = Isomessagecreate();
       final processorParsing = ISOMessageParsing();
       final isoMessage = processor.createIsoMessage(_controller.text);
-      final isoMessagetoSent = 'xx' + isoMessage;
-      final parsingISO = processorParsing.printResponse(_controller.text);
+      final isoMessagetoSent = 'XX' + isoMessage;
+      // final parsingISO = processorParsing.printResponse(_controller.text);
 
-      setState(() {
-        _outputISOMessage = isoMessage;
-        _outputISOMessageParsing = parsingISO;
-      });
+      // setState(() {
+        // _outputISOMessage = isoMessage;
+        // _outputISOMessageParsing = parsingISO;
+      // });
+      // print("Prepaid Message: "+ isoMessagetoSent);
 
-      // try {
-      //   String serverResponse = await processor.sendISOMessage(isoMessagetoSent);
-      //   print('Server Response: $serverResponse');
-      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-      //     final parsingISO =
-      //         processorParsing.printResponse(serverResponse, _controller.text);
-      //     setState(() {
-      //       _outputISOMessageParsing = parsingISO;
-      //     });
-      //   } else {
-      //     String serverResponseClean =
-      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
-      //     QuickAlert.show(
-      //       context: context,
-      //       type: QuickAlertType.error,
-      //       title: 'Terjadi Kesalahan',
-      //       text: serverResponseClean,
-      //       confirmBtnText: 'OK',
-      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //     );
-      //     _controller.clear();
-      //   }
-      // } catch (e) {
-      //   print('Error: $e');
-      // }
+      try {
+        String serverResponse = await processor.sendISOMessage(isoMessagetoSent);
+        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+          final parsingISO =
+              processorParsing.printResponse(serverResponse, _controller.text);
+          if (parsingISO.startsWith("Terjadi Kesalahan")) {
+            String serverResponseClean =
+                parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+            QuickAlert.show(
+              context: context,
+              type: QuickAlertType.error,
+              title: 'Terjadi Kesalahan',
+              text: serverResponseClean,
+              confirmBtnText: 'OK',
+              confirmBtnColor: Theme.of(context).colorScheme.primary,
+            );
+            _controller.clear();
+          } else {
+            setState(() {
+              _outputISOMessageParsing = parsingISO;
+            });
+          }
+        } else {
+          String serverResponseClean =
+              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'Terjadi Kesalahan',
+            text: serverResponseClean,
+            confirmBtnText: 'OK',
+            confirmBtnColor: Theme.of(context).colorScheme.primary,
+          );
+          _controller.clear();
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
     }
   }
 
@@ -222,7 +236,7 @@ class _prepaid_screenState extends State<prepaid_screen> {
                               ),
                             ),
                           ),
-                          if (_outputISOMessageParsing.startsWith('ID'))
+                          if (_outputISOMessageParsing.startsWith('NAMA'))
                             TextSpan(
                               text: 'PILIH DENOM : $_denomValue',
                               style: GoogleFonts.dongle(
@@ -236,12 +250,12 @@ class _prepaid_screenState extends State<prepaid_screen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    if (_outputISOMessageParsing.startsWith('ID'))
+                    if (_outputISOMessageParsing.startsWith('NAMA'))
                       CustomRadioWidget(
                         valueChanged: _onRadioValueChanged,
                         initialValue: _selectedDenom,
                       ),
-                    if (_outputISOMessageParsing.startsWith('ID'))
+                    if (_outputISOMessageParsing.startsWith('NAMA'))
                       RichText(
                         text: TextSpan(
                           children: <TextSpan>[

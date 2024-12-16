@@ -36,32 +36,32 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
       final isoMessage = processor.createIsoMessage(_controller.text);
       final isoMessagetoSent = 'xx' + isoMessage;
 
-      try {
-        String serverResponse =
-            await processor.sendISOMessage(isoMessagetoSent);
-        print('Server Response: $serverResponse');
-        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-          final parsingISO =
-              processorParsing.printResponse(serverResponse, _controller.text);
-          setState(() {
-            _outputISOMessageParsing = parsingISO;
-          });
-        } else {
-          String serverResponseClean =
-              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
-          QuickAlert.show(
-            context: context,
-            type: QuickAlertType.error,
-            title: 'Terjadi Kesalahan',
-            text: serverResponseClean,
-            confirmBtnText: 'OK',
-            confirmBtnColor: Theme.of(context).colorScheme.primary,
-          );
-          _controller.clear();
-        }
-      } catch (e) {
-        print('Error: $e');
-      }
+      // try {
+      //   String serverResponse =
+      //       await processor.sendISOMessage(isoMessagetoSent);
+      //   print('Server Response: $serverResponse');
+      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+      //     final parsingISO =
+      //         processorParsing.printResponse(serverResponse, _controller.text);
+      //     setState(() {
+      //       _outputISOMessageParsing = parsingISO;
+      //     });
+      //   } else {
+      //     String serverResponseClean =
+      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+      //     QuickAlert.show(
+      //       context: context,
+      //       type: QuickAlertType.error,
+      //       title: 'Terjadi Kesalahan',
+      //       text: serverResponseClean,
+      //       confirmBtnText: 'OK',
+      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //     );
+      //     _controller.clear();
+      //   }
+      // } catch (e) {
+      //   print('Error: $e');
+      // }
     }
   }
 

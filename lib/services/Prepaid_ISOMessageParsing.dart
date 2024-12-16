@@ -19,14 +19,13 @@ class ISOMessageParsing {
 
   // PROSES DEFINISIKAN ISO RESPONSE
   // PANJANG LOOPING SESUAI DENGAN PANJANG KARAKTER BIT48, TOTAL JUMLAH TAGIHAN
-  String printResponse(String idpel) {
+  String printResponse(String serverResponse, String idpel) {
     try {
-      String serverResponse =
-          "XX0210723A40010AC180000514501380000000000100100111510495800743410495811151116602116ALN32SATPZ01P3330000000000010054ALF001201000145100000229" +
-              "1738181571221002JTE210ZD9D542936A78FE11A4ECE07DDUMMY SAT PLN PREPAID 22 17380               R1  000000900000000000" + //Awalan Bit 48
-              "2024110000000000000000000000100100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
-              // "2024100000000000000000000000200100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
-              "360";
+      // String serverResponse =
+      //     "XX0210723A40010AC180040553502380000000000000000121614585800743414585812161217602116ALN32SATPZ01P333000000000001" +
+      //     "0054ALF001201000145100000" +
+      //     "133JTL53L31410161770054211122882209362F3DDA3824510B3BF68DE226117952ALF210Z25355EED4B315710A05D1B2B" +
+      //     "DEV SAT PREPAID          R3  0000077003600505454211               0000000000000000000000000000";
       // print("Contoh Response: $serverResponse");
       return parseISOResponse(serverResponse, idpel);
     } catch (e) {
@@ -115,159 +114,110 @@ class ISOMessageParsing {
   }
 
   // PROSES PARSING BIT48 DAN RETURN VALUE
-  static String parseBit48(String bit48, String idpel) {
+  static List<dynamic> parseBit48(String bit48, String idpel) {
     // print("Parsing Bit 48:");
 
     // Mulai parsing data berdasarkan struktur
     int currentIndex = 0;
     String parsedResult = '';
 
-    // 1. ID Pelanggan (13 karakter)
-    String idPelanggan = bit48.substring(currentIndex, currentIndex + 12);
+    // 1. ID Partner (7 karakter)
+    currentIndex += 7;
+
+    // 2. No. Meter (11 karakter)
+    String nometer = bit48.substring(currentIndex, currentIndex + 11);
+    currentIndex += 11;
+
+    // 3. ID Pelanggan (12 Karakter)
     currentIndex += 12;
 
-    // 2. Jumlah Tagihan (3 karakter)
-    String jumlahTagihan = bit48.substring(currentIndex, currentIndex + 1);
+    // 4. Buy Option (1 Karakter)
     currentIndex += 1;
-    int totalDataLooping = int.parse(jumlahTagihan);
 
-    // 2. Jumlah Tagihan (3 karakter)
-    String sisaTagihan = bit48.substring(currentIndex, currentIndex + 2);
-    currentIndex += 2;
-
-    // Jumlahkan Tagihan dengan sisa
-    int totalTagihan = int.parse(jumlahTagihan) + int.parse(sisaTagihan);
-
-    // 3. Scref (32 karakter)
+    // 5. PLN REF (32 Karakter)
     currentIndex += 32;
 
-    // 4. Nama (20 karakter)
-    String nama = bit48.substring(currentIndex, currentIndex + 25).trim();
+    // 6. SCREF (32 karakter)
+    currentIndex += 32;
+
+    // 7. Nama (25 karakter)
+    String nama = bit48.substring(currentIndex, currentIndex + 25);
     currentIndex += 25;
 
-    // 5. Kode Unit (5 karakter)
-    currentIndex += 5;
-
-    // 6. Telepon Unit (16 karakter, jika kosong tetap dihitung)
-    currentIndex += 15;
-
-    // 7. Tarif (2 karakter)
+    // 8. Tarif (4 Karakter)
     String tarif = bit48.substring(currentIndex, currentIndex + 4).trim();
     currentIndex += 4;
 
-    // 8. Daya (9 karakter)
-    String daya = bit48.substring(currentIndex, currentIndex + 9).trim()
-          .replaceFirst(RegExp(r'^0+'), ''); // tanpa awalan nol;
+    // 9. Daya (9 Karakter)
+    String daya = bit48.substring(currentIndex, currentIndex + 9);
     currentIndex += 9;
+    
+    // 10. Daya (contoh: 000007700)
+    String dayaClean = daya.replaceFirst(RegExp(r'^0+'), '');
+    int dayaVal = int.parse(dayaClean);
 
-    // 9. Admin (9 karakter)
-    // String admin = bit48.substring(currentIndex, currentIndex + 9);
-    int admin = 2500;
-    currentIndex += 9;
-    // String cleanedAdmin = admin.replaceFirst(RegExp(r'^0+'), '');
-    // String adminVal = cleanedAdmin.isNotEmpty ? cleanedAdmin : '0';
+    // parsedResult = "IDPEL : $idpel\n"
+    //     "NAMA : $nama\n"
+    //     "TOTAL LEMBAR TAGIHAN : $totalTagihan\n"
+    //     "BL/TH : $periodeLooping\n"
+    //     "RP TAG PLN : $formattedRPTAG\n"
+    //     "ADMIN BANK : $formattedAdmin\n"
+    //     "TOTAL : $formattedTotBay\n";
 
-    // 9. Data Looping (115 karakter)
-    List<String> dataLooping = [];
-    for (int i = 0; i < totalDataLooping; i++) {
-      String loopingData = bit48.substring(currentIndex, currentIndex + 115);
-      dataLooping.add(loopingData);
-      currentIndex += 115;
-    }
-
-    // Parsing setiap data looping
-    int totalTagihanLooping =
-        0; // Variabel untuk menjumlahkan semua tagihanlooping
-    int totalDendaLooping = 0; // Variabel untuk menjumlahkan semua dendalooping
-    for (String data in dataLooping) {
-      String tagihanlooping = data
-          .substring(22, 34)
-          .replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
-      String dendalooping = data
-          .substring(55, 67)
-          .replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
-      if (dendalooping.isEmpty) {
-        dendalooping = '0';
-      }
-
-      totalTagihanLooping +=
-          int.parse(tagihanlooping); // Menjumlahkan tagihanlooping
-      totalDendaLooping +=
-          int.parse(dendalooping); // Menjumlahkan tagihanlooping
-    }
-
-    List<String> tahunList = dataLooping.map((e) => e.substring(0, 4)).toList();
-    List<String> bulanList = dataLooping.map((e) => e.substring(4, 6)).toList();
-    List<String> bulanNamaList =
-        bulanList.map((e) => bulanArray[int.parse(e)]).toList();
-    List<String> periodeLoopingList = List.generate(dataLooping.length,
-        (index) => "${bulanNamaList[index]}${tahunList[index]}");
-    // Menggabungkan elemen-elemen periodeLoopingList menjadi satu string dan menghapus karakter [ dan ]
-    String periodeLooping =
-        periodeLoopingList.toString().replaceAll(RegExp(r'[\[\]]'), '');
-    int totalPeriodeLooping = periodeLoopingList.length;
-
-    int totalAdmin = admin * totalPeriodeLooping;
-
-    String formattedAdmin =
-        NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
-            .format(totalAdmin);
-
-    // Hitung total dari semua tagihan dan denda looping
-    int RPTagPLN = totalTagihanLooping + totalDendaLooping;
-    String formattedRPTAG =
-        NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
-            .format(RPTagPLN);
-
-    int totalBayar = RPTagPLN + totalAdmin;
-    String formattedTotBay =
-        NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
-            .format(totalBayar);
-
-    parsedResult = "IDPEL : $idpel\n"
-        "NAMA : $nama\n"
-        "TARIF/DAYA : $tarif/$daya\n";
-
-    return parsedResult
-        .trim(); // Menghilangkan spasi atau baris kosong di akhir
+    // return parsedResult
+    //     .trim(); // Menghilangkan spasi atau baris kosong di akhir
+    return [
+      nama,        // Nama pelanggan
+      nometer,     // No. Meter
+      tarif,       // Tarif
+      dayaVal,     // Daya
+    ];
   }
 
   static String processResponseCode(String bit39, String idpel, String? bit48) {
     if (bit39 == '00') {
       // Jika bit39 == '00', langsung kembalikan hasil dari parseBit48
       if (bit48 != null) {
-        return parseBit48(bit48, idpel);
-        // return bit48;
+        // return parseBit48(bit48, idpel);
+        List<dynamic> result = parseBit48(bit48, idpel);
+        String nama = result[0];
+        String nometer = result[1];
+        String tarif = result[2];
+        int daya = result[3];
+        return "NAMA: $nama\n"
+               "NO. METER: $nometer\n"
+               "TARIF/DAYA: $tarif/$daya";
+          // return bit48;
       } else {
         // return "Bit 39 == 00 tetapi Bit 48 tidak tersedia.";
-        return "Terjadi Kegagalan Saat Cek Data";
+        return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
       }
     } else {
       // Kode yang ada sebelumnya
       switch (bit39) {
         case '09':
-          return 'NO. METER / IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+          return 'Terjadi Kesalahan: NO. METER / IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
         case '14':
-          return 'IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+          return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
         case '47':
-          return 'TOTAL KWH MELEBIHI BATAS MAKSIMUM';
+          return 'Terjadi Kesalahan: TOTAL KWH MELEBIHI BATAS MAKSIMUM';
         case '63':
         case '16':
-          return 'KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
+          return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
         case '34':
-          return 'TAGIHAN SUDAH TERBAYAR';
+          return 'Terjadi Kesalahan: TAGIHAN SUDAH TERBAYAR';
         case '77':
-          return 'NO. METER YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+          return 'Terjadi Kesalahan: NO. METER YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
         case '78':
-          return 'NO. METER / IDPEL TIDAK DIIZINKAN UNTUK MELAKUKAN PEMBELIAN, SEGERA HUBUNGI PLN TERDEKAT';
+          return 'Terjadi Kesalahan: NO. METER / IDPEL TIDAK DIIZINKAN UNTUK MELAKUKAN PEMBELIAN, SEGERA HUBUNGI PLN TERDEKAT';
         case '82':
-          return 'TAGIHAN BELUM TERSEDIA';
+          return 'Terjadi Kesalahan: TAGIHAN BELUM TERSEDIA';
         case '90':
-          return 'TRANSAKSI CUT OFF';
+          return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
         case '18':
-          return 'TIMEOUT';
+          return 'Terjadi Kesalahan: TIMEOUT';
         default:
-          return "Kode Bit 39 tidak dikenali.";
+          return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
       }
     }
   }
