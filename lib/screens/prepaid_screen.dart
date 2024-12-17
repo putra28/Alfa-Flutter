@@ -1,5 +1,3 @@
-// lib/screens/prepaid_screen.dart
-
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,16 +5,18 @@ import '../services/Prepaid_ISOMessageCreate.dart'; // Import file processor.dar
 import '../services/Prepaid_ISOMessageParsing.dart'; // Import file untuk ISOMessageParsing
 import '../widgets/CustomRadioWidget.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class prepaid_screen extends StatefulWidget {
   const prepaid_screen({super.key});
 
   @override
-  _prepaid_screenState createState() => _prepaid_screenState();
+  _PrepaidScreenState createState() => _PrepaidScreenState();
 }
 
-class _prepaid_screenState extends State<prepaid_screen> {
+class _PrepaidScreenState extends State<prepaid_screen> {
   final TextEditingController _controller = TextEditingController();
+
   String _outputISOMessage = ""; // Variabel untuk menyimpan output
   String _outputISOMessageParsing = ""; // Variabel untuk menyimpan output
   String? _denomValue = "";
@@ -41,6 +41,7 @@ class _prepaid_screenState extends State<prepaid_screen> {
             .format(_totalBayar);
   }
 
+  // Modify the _handleSubmit method to handle asynchronous operations properly
   void _handleSubmit() async {
     if (_controller.text.isEmpty) {
       QuickAlert.show(
@@ -52,25 +53,18 @@ class _prepaid_screenState extends State<prepaid_screen> {
         confirmBtnColor: Theme.of(context).colorScheme.primary,
       );
       return;
-    } 
-    else {
+    } else {
       final processor = Isomessagecreate();
       final processorParsing = ISOMessageParsing();
       final isoMessage = processor.createIsoMessage(_controller.text);
       final isoMessagetoSent = 'XX' + isoMessage;
-      // final parsingISO = processorParsing.printResponse(_controller.text);
-
-      // setState(() {
-        // _outputISOMessage = isoMessage;
-        // _outputISOMessageParsing = parsingISO;
-      // });
-      // print("Prepaid Message: "+ isoMessagetoSent);
 
       try {
-        String serverResponse = await processor.sendISOMessage(isoMessagetoSent);
+        String serverResponse = await processor
+            .sendISOMessage(isoMessagetoSent); // Asynchronous call
         if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-          final parsingISO =
-              processorParsing.printResponse(serverResponse, _controller.text);
+          final parsingISO = await processorParsing.printResponse(
+              serverResponse, _controller.text); // Await response here
           if (parsingISO.startsWith("Terjadi Kesalahan")) {
             String serverResponseClean =
                 parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
@@ -212,7 +206,7 @@ class _prepaid_screenState extends State<prepaid_screen> {
               Container(
                 margin: EdgeInsets.symmetric(horizontal: width * 0.05),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     RichText(
                       text: TextSpan(
@@ -248,7 +242,6 @@ class _prepaid_screenState extends State<prepaid_screen> {
                             ),
                         ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
                     if (_outputISOMessageParsing.startsWith('NAMA'))
                       CustomRadioWidget(
@@ -271,7 +264,6 @@ class _prepaid_screenState extends State<prepaid_screen> {
                             ),
                           ],
                         ),
-                        textAlign: TextAlign.center,
                       ),
                   ],
                 ),
@@ -304,9 +296,14 @@ class _prepaid_screenState extends State<prepaid_screen> {
                       margin: EdgeInsets.symmetric(horizontal: width * 0.05),
                       height: height * 0.07,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           // Logic untuk melanjutkan proses pembayaran
-                          // Tambahkan logika pengiriman data ke server atau proses lain
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          String? nama = prefs.getString('nama');
+                          String? nometer = prefs.getString('nometer');
+                          String? tarif = prefs.getString('tarif');
+                          int? daya = prefs.getInt('daya');
+                          print(nama);
                           print("Proses pembayaran dilanjutkan");
                         },
                         child: Text('Booking No. Antrian'),
@@ -315,6 +312,7 @@ class _prepaid_screenState extends State<prepaid_screen> {
                   ),
                 ],
               ),
+            SizedBox(height: height * 0.01),
           ],
         ),
       ),
