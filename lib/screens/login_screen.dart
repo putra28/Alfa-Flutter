@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quickalert/quickalert.dart';
 import 'homepage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,7 +15,6 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController _controller = TextEditingController();
   void _handleSubmit() async {
-    print("ID Toko: ${_controller.text}");
     if (_controller.text.isEmpty) {
       QuickAlert.show(
         context: context,
@@ -26,6 +26,10 @@ class _LoginState extends State<Login> {
       );
       return;
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('IDToko', _controller.text);
+    String? IDToko = prefs.getString('IDToko');
+        print("IDToko: $IDToko");
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -112,7 +116,7 @@ class _LoginState extends State<Login> {
                     height: 54,
                     child: ElevatedButton(
                       onPressed: _handleSubmit,
-                      child: Text('Cek'),
+                      child: Text('Login'),
                     ),
                   ),
                 ),

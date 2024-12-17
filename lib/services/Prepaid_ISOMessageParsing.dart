@@ -124,34 +124,31 @@ class ISOMessageParsing {
         List<dynamic> result = parseBit48(bit48, idpel);
         if (bit62 != null) {
           List<dynamic> result62 = parseBit62(bit62);
-          print(result62[3]);
-
           List<int> dataPerulanganVal = result62[4];
-          String perulangan = "";
-          for (int i = 0; i < dataPerulanganVal.length; i++) {
-            perulangan += "${dataPerulanganVal[i]}\n";
+          if (dataPerulanganVal != 0) {
+            String perulangan = "";
+            for (int i = 0; i < dataPerulanganVal.length; i++) {
+              perulangan += "${dataPerulanganVal[i]}\n";
+            }
+            print(perulangan);
           }
-          print(perulangan);
-        String nama = result[0];
-        String nometer = result[1];
-        String tarif = result[2];
-        int daya = result[3];
+          String nama = result[0];
+          String nometer = result[1];
+          String tarif = result[2];
+          int daya = result[3];
 
+          // Store result in shared preferences for session
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('nama', nama);
+          await prefs.setString('nometer', nometer);
+          await prefs.setString('tarif', tarif);
+          await prefs.setInt('daya', daya);
 
-
-        // Store result in shared preferences for session
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('nama', nama);
-        await prefs.setString('nometer', nometer);
-        await prefs.setString('tarif', tarif);
-        await prefs.setInt('daya', daya);
-
-        return "NAMA: $nama\n"
-            "NO. METER: $nometer\n"
-            "TARIF/DAYA: $tarif/$daya";
-        }
-        else{
-        return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
+          return "NAMA: $nama\n"
+              "NO. METER: $nometer\n"
+              "TARIF/DAYA: $tarif/$daya";
+        } else {
+          return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
         }
       } else {
         return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
@@ -198,19 +195,23 @@ class ISOMessageParsing {
     currentIndex += 15;
     String totalUnsold = bit62.substring(currentIndex, currentIndex + 6);
     currentIndex += 6;
-    String totalUnsoldClean = totalUnsold.replaceFirst(RegExp(r'^0+'), '');
+    String totalUnsoldClean = totalUnsold == '000000' ? '0' : totalUnsold.replaceFirst(RegExp(r'^0+'), '');
     int totalUnsoldVal = int.parse(totalUnsoldClean);
 
     List<String> dataPerulangan = [];
     List<int> dataPerulanganVal = [];
-    for (int i = 0; i < totalUnsoldVal; i++) {
-      String data = bit62.substring(currentIndex, currentIndex + 11);
-      currentIndex += 11;
-      dataPerulangan.add(data);
-      String dataPerulanganclean =
-          dataPerulangan[i].replaceFirst(RegExp(r'^0+'), '');
-      int dataPerulanganValitem = int.parse(dataPerulanganclean);
-      dataPerulanganVal.add(dataPerulanganValitem);
+    if (totalUnsoldVal != 0) {
+      for (int i = 0; i < totalUnsoldVal; i++) {
+        String data = bit62.substring(currentIndex, currentIndex + 11);
+        currentIndex += 11;
+        dataPerulangan.add(data);
+        String dataPerulanganclean =
+            dataPerulangan[i].replaceFirst(RegExp(r'^0+'), '');
+        int dataPerulanganValitem = int.parse(dataPerulanganclean);
+        dataPerulanganVal.add(dataPerulanganValitem);
+      }
+    } else {
+      dataPerulanganVal.add(0);
     }
 
     return [kodeDist, kodeUnit, telpUnit, totalUnsoldVal, dataPerulanganVal];
