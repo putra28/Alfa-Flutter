@@ -304,6 +304,9 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                           String? tarif = prefs.getString('tarif');
                           int? daya = prefs.getInt('daya');
                           print(nama);
+                          print(nometer);
+                          print(tarif);
+                          print(daya);
                           print("Proses pembayaran dilanjutkan");
                         },
                         child: Text('Booking No. Antrian'),

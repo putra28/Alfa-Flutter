@@ -31,7 +31,8 @@ class ISOMessageParsing {
       // Tunggu hasil dari parseISOResponse yang bisa asinkron
       return await parseISOResponse(serverResponse, idpel);
     } catch (e) {
-      return e.toString();
+      // return e.toString();
+      return "Terjadi Kesalahan, Silahkan Coba Lagi";
     }
   }
 

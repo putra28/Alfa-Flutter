@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ISOMessageParsing {
   static List<String> bulanArray = [
@@ -17,38 +18,37 @@ class ISOMessageParsing {
     'DES'
   ];
 
+  static List<dynamic>?
+      result; // Variabel statis untuk menyimpan hasil parse Bit 48
+
   // PROSES DEFINISIKAN ISO RESPONSE
   // PANJANG LOOPING SESUAI DENGAN PANJANG KARAKTER BIT48, TOTAL JUMLAH TAGIHAN
-  String printResponse(String serverResponse, String idpel) {
+  Future<String> printResponse(String idpel) async {
     try {
-      // String serverResponse =
-      //     "XX0210723A40010AC180000514501380000000000100100111510495800743410495811151116602116ALN32SATPZ01P3330000000000010054ALF001201000145100000229" +
-      //         "1738181571221002JTE210ZD9D542936A78FE11A4ECE07DDUMMY SAT PLN POSTPAID 2 17380               R1  000000900000000000" + //Awalan Bit 48
-      //         "2024110000000000000000000000100100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
-      //         // "2024100000000000000000000000200100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
-      //         "360";
+      String serverResponse =
+          "XX0210723A40010AC180000514501380000000000100100111510495800743410495811151116602116ALN32SATPZ01P3330000000000010054ALF001201000145100000344" +
+              "1738181571222002JTE210ZD9D542936A78FE11A4ECE07DDUMMY SAT PLN POSTPAID 2 17380               R1  000000900000000000" + //Awalan Bit 48
+              "2024110000000000000000000000100100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
+              "2024100000000000000000000000200100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
+              "360";
       // print("Contoh Response: $serverResponse");
-      return parseISOResponse(serverResponse, idpel);
+      return await parseISOResponse(serverResponse, idpel);
     } catch (e) {
       // print("Failed to process response.");
       // print(e);
-      return e.toString();
+      // return e.toString();
+      return "Terjadi Kesalahan, Silahkan Coba Lagi";
     }
   }
 
   // PROSES DEFINISIKAN SETIAP BIT
-  static String parseISOResponse(String isoMessage, String idpel) {
+  static Future<String> parseISOResponse(
+      String isoMessage, String idpel) async {
     String header = isoMessage.substring(0, 2);
-    // MTI (4 karakter pertama)
     String mti = isoMessage.substring(2, 6);
-
-    // Primary Bitmap (16 karakter setelah MTI)
     String primaryBitmapHex = isoMessage.substring(6, 22);
-
-    // Convert Primary Bitmap to Binary
     String primaryBitmapBinary = hexToBinary(primaryBitmapHex);
 
-    // Map untuk mendefinisikan panjang setiap bit
     Map<int, int> bitLengths = {
       3: 6,
       4: 12,
@@ -71,6 +71,7 @@ class ISOMessageParsing {
     int currentIndex = 22; // Setelah Primary Bitmap
     String? bit39; // Deklarasi untuk menyimpan Bit 39
     String? bit48; // Deklarasi untuk menyimpan Bit 48
+
     for (int bit = 1; bit <= primaryBitmapBinary.length; bit++) {
       if (primaryBitmapBinary[bit - 1] == '1') {
         if (bit == 2 || bit == 32) {
@@ -88,7 +89,6 @@ class ISOMessageParsing {
           currentIndex += length;
           bit39 = value; // Simpan nilai Bit 39 ke variabel
         } else if (bit == 48) {
-          // Bits dengan panjang variabel
           int length =
               int.parse(isoMessage.substring(currentIndex, currentIndex + 3));
           currentIndex += 3; // Pindah ke data setelah length
@@ -108,7 +108,7 @@ class ISOMessageParsing {
 
     // Proses Bit 39
     if (bit39 != null) {
-      return processResponseCode(bit39, idpel, bit48);
+      return await processResponseCode(bit39, idpel, bit48);
     } else {
       return "Bit 39 tidak ditemukan.";
     }
@@ -117,46 +117,33 @@ class ISOMessageParsing {
   // PROSES PARSING BIT48 DAN RETURN VALUE
   static List<dynamic> parseBit48(String bit48, String idpel) {
     // print("Parsing Bit 48:");
-
-    // Mulai parsing data berdasarkan struktur
     int currentIndex = 0;
-    String parsedResult = '';
 
     // 1. ID Pelanggan (13 karakter)
     String idPelanggan = bit48.substring(currentIndex, currentIndex + 12);
     currentIndex += 12;
-
     // 2. Jumlah Tagihan (3 karakter)
     String jumlahTagihan = bit48.substring(currentIndex, currentIndex + 1);
     currentIndex += 1;
     int totalDataLooping = int.parse(jumlahTagihan);
-
     // 2. Jumlah Tagihan (3 karakter)
     String sisaTagihan = bit48.substring(currentIndex, currentIndex + 2);
     currentIndex += 2;
-
     // Jumlahkan Tagihan dengan sisa
     int totalTagihan = int.parse(jumlahTagihan) + int.parse(sisaTagihan);
-
     // 3. Scref (32 karakter)
     currentIndex += 32;
-
     // 4. Nama (20 karakter)
     String nama = bit48.substring(currentIndex, currentIndex + 25).trim();
     currentIndex += 25;
-
     // 5. Kode Unit (5 karakter)
     currentIndex += 5;
-
     // 6. Telepon Unit (16 karakter, jika kosong tetap dihitung)
     currentIndex += 15;
-
     // 7. Tarif (2 karakter)
     currentIndex += 4;
-
     // 8. Daya (9 karakter)
     currentIndex += 9;
-
     // 9. Admin (9 karakter)
     // String admin = bit48.substring(currentIndex, currentIndex + 9);
     int admin = 2500;
@@ -232,16 +219,17 @@ class ISOMessageParsing {
     // return parsedResult
     //     .trim(); // Menghilangkan spasi atau baris kosong di akhir
     return [
-      nama,               // Nama pelanggan
-      totalTagihan,       // Total tagihan
-      periodeLooping,     // Periode looping (contoh: "JAN2024, FEB2024")
-      formattedRPTAG,     // Format rupiah untuk tagihan PLN
-      formattedAdmin,     // Format rupiah untuk admin bank
-      formattedTotBay     // Format total bayar
+      nama, // Nama pelanggan
+      totalTagihan, // Total tagihan
+      periodeLooping, // Periode looping (contoh: "JAN2024, FEB2024")
+      formattedRPTAG, // Format rupiah untuk tagihan PLN
+      formattedAdmin, // Format rupiah untuk admin bank
+      formattedTotBay // Format total bayar
     ];
   }
 
-  static String processResponseCode(String bit39, String idpel, String? bit48) {
+  static Future<String> processResponseCode(
+      String bit39, String idpel, String? bit48) async {
     if (bit39 == '00') {
       // Jika bit39 == '00', langsung kembalikan hasil dari parseBit48
       if (bit48 != null) {
@@ -253,14 +241,26 @@ class ISOMessageParsing {
         String formattedRPTAG = result[3];
         String formattedAdmin = result[4];
         String formattedTotBay = result[5];
+
+        // Store result in shared preferences for session
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('nama', nama);
+        await prefs.setInt('totalTagihan', totalTagihan);
+        await prefs.setString('periodeLooping', periodeLooping);
+        await prefs.setString('formattedRPTAG', formattedRPTAG);
+        await prefs.setString('formattedAdmin', formattedAdmin);
+        await prefs.setString('formattedTotBay', formattedTotBay);
+
         return "IDPEL: $idpel\n"
-               "NAMA: $nama\n"
-               "TOTAL TAGIHAN: $totalTagihan\n"
-               "BL/TH: $periodeLooping\n"
-               "RP TAG PLN: $formattedRPTAG\n"
-               "ADMIN BANK: $formattedAdmin\n"
-               "TOTAL BAYAR: $formattedTotBay\n";
-          // return bit48;
+                "NAMA: $nama\n"
+                "TOTAL TAGIHAN: $totalTagihan\n"
+                "BL/TH: $periodeLooping\n"
+                "RP TAG PLN: $formattedRPTAG\n"
+                "ADMIN BANK: $formattedAdmin\n"
+                "TOTAL BAYAR: $formattedTotBay"
+            .trim();
+        // return "gacor lek ku";
+        // return bit48;
       } else {
         // return "Bit 39 == 00 tetapi Bit 48 tidak tersedia.";
         return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";

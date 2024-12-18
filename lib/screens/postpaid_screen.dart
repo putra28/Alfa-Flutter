@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/ISOMessageCreate.dart';
 import '../services/Postpaid_ISOMessageParsing.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class postpaid_screen extends StatefulWidget {
   const postpaid_screen({super.key});
@@ -35,52 +36,65 @@ class _postpaid_screenState extends State<postpaid_screen> {
       final isoMessage = processor.createIsoMessage(_controller.text);
       final isoMessagetoSent = 'XX' + isoMessage;
 
-      // final parsingISO = processorParsing.printResponse(_controller.text);
-
-      // setState(() {
-      //   _outputISOMessage = isoMessage;
-      //   _outputISOMessageParsing = parsingISO;
-      // });
-      try {
-        String serverResponse =
-            await processor.sendISOMessage(isoMessagetoSent);
-        print('Server Response: $serverResponse');
-        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-          final parsingISO =
-              processorParsing.printResponse(serverResponse, _controller.text);
-          if (parsingISO.startsWith("Terjadi Kesalahan")) {
-            String serverResponseClean =
-                serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
-            QuickAlert.show(
-              context: context,
-              type: QuickAlertType.error,
-              title: 'Terjadi Kesalahan',
-              text: serverResponseClean,
-              confirmBtnText: 'OK',
-              confirmBtnColor: Theme.of(context).colorScheme.primary,
-            );
-            _controller.clear();
-          } else {
-            setState(() {
-              _outputISOMessageParsing = parsingISO;
-            });
-          }
-        } else {
-          String serverResponseClean =
-              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
-          QuickAlert.show(
-            context: context,
-            type: QuickAlertType.error,
-            title: 'Terjadi Kesalahan',
-            text: serverResponseClean,
-            confirmBtnText: 'OK',
-            confirmBtnColor: Theme.of(context).colorScheme.primary,
-          );
-          _controller.clear();
-        }
-      } catch (e) {
-        print('Error: $e');
+      final parsingISO = await processorParsing.printResponse(_controller.text);
+      if (parsingISO.startsWith("Terjadi Kesalahan")) {
+        String serverResponseClean =
+            parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Terjadi Kesalahan',
+          text: serverResponseClean,
+          confirmBtnText: 'OK',
+          confirmBtnColor: Theme.of(context).colorScheme.primary,
+        );
+        _controller.clear();
+      } else {
+        setState(() {
+        _outputISOMessage = isoMessage;
+        _outputISOMessageParsing = parsingISO.trim();
+        });
       }
+      // try {
+      //   String serverResponse =
+      //       await processor.sendISOMessage(isoMessagetoSent);
+      //   print('Server Response: $serverResponse');
+      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+      //     final parsingISO =
+      //         processorParsing.printResponse(serverResponse, _controller.text);
+      //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
+      //       String serverResponseClean =
+      //           parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+      //       QuickAlert.show(
+      //         context: context,
+      //         type: QuickAlertType.error,
+      //         title: 'Terjadi Kesalahan',
+      //         text: serverResponseClean,
+      //         confirmBtnText: 'OK',
+      //         confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //       );
+      //       _controller.clear();
+      //     } else {
+      //       setState(() {
+      //         _outputISOMessageParsing = parsingISO;
+      //       });
+      //     }
+      //   } else {
+      //     String serverResponseClean =
+      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+      //     QuickAlert.show(
+      //       context: context,
+      //       type: QuickAlertType.error,
+      //       title: 'Terjadi Kesalahan',
+      //       text: serverResponseClean,
+      //       confirmBtnText: 'OK',
+      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //     );
+      //     _controller.clear();
+      //   }
+      // } catch (e) {
+      //   print('Error: $e');
+      // }
     }
   }
 
@@ -159,7 +173,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                     flex: 3,
                     child: Container(
                       margin: EdgeInsets.only(right: width * 0.05),
-                      height: 54,
+                      height: height * 0.07,
                       child: ElevatedButton(
                         onPressed: _handleSubmit,
                         child: Text('Cek'),
@@ -187,33 +201,37 @@ class _postpaid_screenState extends State<postpaid_screen> {
                 ),
               if (!_outputISOMessageParsing.isEmpty)
                 Container(
-                  alignment: Alignment.center,
+                  alignment: Alignment.centerLeft,
                   margin: EdgeInsets.symmetric(horizontal: width * 0.05),
-                  child: RichText(
-                    text: TextSpan(
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: 'PLN Postpaid \n',
-                          style: GoogleFonts.dongle(
-                            textStyle: TextStyle(
-                              fontSize: width * 0.06,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: 'PLN Postpaid \n',
+                              style: GoogleFonts.dongle(
+                                textStyle: TextStyle(
+                                  fontSize: width * 0.06,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        TextSpan(
-                          text: '$_outputISOMessageParsing',
-                          style: GoogleFonts.dongle(
-                            textStyle: TextStyle(
-                              fontSize: width * 0.05,
-                              color: Colors.black,
+                            TextSpan(
+                              text: '$_outputISOMessageParsing',
+                              style: GoogleFonts.dongle(
+                                textStyle: TextStyle(
+                                  fontSize: width * 0.05,
+                                  color: Colors.black,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
               SizedBox(height: height * 0.01),
@@ -240,15 +258,22 @@ class _postpaid_screenState extends State<postpaid_screen> {
                         margin: EdgeInsets.symmetric(horizontal: width * 0.05),
                         height: height * 0.07,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // print(
-                            //   'Kdtoko: $_outputISOMessageParsing\n' +
-                            //   'amount: $_outputISOMessageParsing\n' +
-                            //   'idpel: $_outputISOMessageParsing\n' +
-                            //   'rptag: $_outputISOMessageParsing\n' +
-                            //   'admttl: $_outputISOMessageParsing\n' +
-                            //   'lembar: $_outputISOMessageParsing\n'
-                            // );
+                        onPressed: () async {
+                            // Logic untuk melanjutkan proses pembayaran
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            String? nama = prefs.getString('nama');
+                            int? totalTagihan = prefs.getInt('totalTagihan');
+                            String? periodeLooping = prefs.getString('periodeLooping');
+                            String? formattedRPTAG = prefs.getString('formattedRPTAG');
+                            String? formattedAdmin = prefs.getString('formattedAdmin');
+                            String? formattedTotBay = prefs.getString('formattedTotBay');
+                            print(nama);
+                            print(totalTagihan);
+                            print(periodeLooping);
+                            print(formattedRPTAG);
+                            print(formattedAdmin);
+                            print(formattedTotBay);
+                            print("Proses pembayaran dilanjutkan");
                           },
                           child: Text('Booking No. Antrian'),
                         ),
@@ -256,8 +281,10 @@ class _postpaid_screenState extends State<postpaid_screen> {
                     ),
                   ],
                 ),
+              SizedBox(height: height * 0.01),
             ],
           ),
-        ));
+        )
+    );
   }
 }
