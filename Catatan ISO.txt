@@ -1,0 +1,21 @@
+0200 --> MTI
+623A400108C18000 --> Bitmap yang tadi dihasilkan
+05 --> length bit 2
+14501 --> bit 2 //2 digit bit 48
+380000 --> bit 3
+1108102458 --> bit 7 //MMddHHmmss
+007434 --> bit 11 //uniq num
+102458 --> bit 12 //HHmmss
+1108 --> bit 13 //MMdd
+1109 --> bit 15 //Tanggal besok MMdd
+6021 --> bit 18 //Merchant
+16 --> length //JPA16
+ALN32SATPZ01P333 --> bit 32 //Id client
+000000000001 --> bit 37 //RRN
+54ALF001 --> bit 41 //PartnerID
+201000145100000012 --> bit 42 //TerminalID
+147200144973 --> bit 48 //INquiry idpel
+360 --> bit 49 //currency code
+char3 --> UjungMessage
+
+0200623A400108C180000514501380000110810245800743410245811081109602116ALN32SATPZ01P33300000000000154ALF001201000145100000012147200144973360

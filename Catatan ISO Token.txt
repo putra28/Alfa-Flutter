@@ -1,0 +1,9 @@
+bit 48 request //kode token
+JTL53L3
+00000000000
+535514278415
+1 //Input idpel
+JTL53L3
+56754222426
+000000000000
+0 //input no. meter
