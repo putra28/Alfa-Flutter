@@ -282,15 +282,17 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               int? RPTagPLN = prefs.getInt('RPTagPLN');
                               int? totalBayar = prefs.getInt('totalBayar');
 
+                              Map<String, dynamic> dataToSend = {
+                                "var_kdtoko": IDToko,
+                                "var_amount": totalBayar,
+                                "var_idpel": idPelanggan,
+                                "var_rptag": RPTagPLN,
+                                "var_admttl": totalAdmin,
+                                "var_lembar": totalTagihan
+                              };
+
                               await BookingAntrian.bookingAntrian(
-                                Method!,
-                                IDToko!,
-                                totalBayar.toString(),
-                                idPelanggan!,
-                                RPTagPLN.toString(),
-                                totalAdmin.toString(),
-                                totalTagihan.toString(),
-                              );
+                                  Method!, dataToSend!);
 
                               print("Kode Toko : $IDToko");
                               print("Amount : $totalBayar");
@@ -314,7 +316,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
                                 title: 'Terjadi Kesalahan',
                                 text: "Gagal Melakukan Booking No. Antrian",
                                 confirmBtnText: 'OK',
-                                confirmBtnColor: Theme.of(context).colorScheme.primary,
+                                confirmBtnColor:
+                                    Theme.of(context).colorScheme.primary,
                               );
                             }
                           },

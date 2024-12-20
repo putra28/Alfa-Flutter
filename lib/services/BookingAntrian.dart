@@ -5,23 +5,12 @@ class BookingAntrian {
   static final String _url = 'http://168.168.10.12:2882/api/link-alfa';
 
   static Future<void> bookingAntrian(
-      String method,
-      String kdtoko,
-      String amount,
-      String idpel,
-      String rptag,
-      String admttl,
-      String lembar) async {
+      String? method,
+      Map<String, dynamic> datatoSend
+      ) async {
     final data = {
       "method": method,
-      "data": {
-        "var_kdtoko": kdtoko,
-        "var_amount": amount,
-        "var_idpel": idpel,
-        "var_rptag": rptag,
-        "var_admttl": admttl,
-        "var_lembar": lembar
-      }
+      "data": datatoSend
     };
 
     final response = await http.post(Uri.parse(_url),

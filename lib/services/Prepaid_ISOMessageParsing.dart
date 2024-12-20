@@ -133,17 +133,15 @@ class ISOMessageParsing {
             }
             print(perulangan);
           }
-          String nama = result[0];
-          String nometer = result[1];
-          String tarif = result[2];
-          int daya = result[3];
+          String idpel = result[0];
+          String nama = result[1];
+          String nometer = result[2];
+          String tarif = result[3];
+          int daya = result[4];
 
           // Store result in shared preferences for session
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('nama', nama);
-          await prefs.setString('nometer', nometer);
-          await prefs.setString('tarif', tarif);
-          await prefs.setInt('daya', daya);
+          await prefs.setString('idpel', idpel);
 
           return "NAMA: $nama\n"
               "NO. METER: $nometer\n"
@@ -170,6 +168,7 @@ class ISOMessageParsing {
     currentIndex += 7;
     String nometer = bit48.substring(currentIndex, currentIndex + 11);
     currentIndex += 11;
+    String idpel = bit48.substring(currentIndex, currentIndex + 12);
     currentIndex += 12;
     currentIndex += 1;
     currentIndex += 32;
@@ -183,7 +182,7 @@ class ISOMessageParsing {
     String dayaClean = daya.replaceFirst(RegExp(r'^0+'), '');
     int dayaVal = int.parse(dayaClean);
 
-    return [nama, nometer, tarif, dayaVal];
+    return [idpel, nama, nometer, tarif, dayaVal];
   }
 
   static List<dynamic> parseBit62(String bit62) {

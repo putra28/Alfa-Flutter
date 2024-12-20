@@ -6,6 +6,7 @@ import '../services/Prepaid_ISOMessageParsing.dart'; // Import file untuk ISOMes
 import '../widgets/CustomRadioWidget.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/BookingAntrian.dart';
 
 class prepaid_screen extends StatefulWidget {
   const prepaid_screen({super.key});
@@ -297,17 +298,51 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                       height: height * 0.07,
                       child: ElevatedButton(
                         onPressed: () async {
-                          // Logic untuk melanjutkan proses pembayaran
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          String? nama = prefs.getString('nama');
-                          String? nometer = prefs.getString('nometer');
-                          String? tarif = prefs.getString('tarif');
-                          int? daya = prefs.getInt('daya');
-                          print(nama);
-                          print(nometer);
-                          print(tarif);
-                          print(daya);
-                          print("Proses pembayaran dilanjutkan");
+                          try {
+                            // Logic untuk melanjutkan proses pembayaran
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            String? Method = "Insert Antrian Prepaid";
+                            String? IDToko = prefs.getString('IDToko');
+                            String? idpel = prefs.getString('idpel');
+                            int? adminTotal = 2500;
+
+                            Map<String, dynamic> dataToSend = {
+                              "var_kdtoko": IDToko,
+                              "var_denom": _selectedDenom,
+                              "var_idpel": idpel,
+                              "var_admttl": adminTotal,
+                            };
+
+                            await BookingAntrian.bookingAntrian(
+                              Method!,
+                              dataToSend!
+                            );
+
+                            print("Kode Toko : $IDToko");
+                            print("ID Pel : $idpel");
+                            print("Denom : $_selectedDenom");
+                            print("Admin Total : $adminTotal");
+                            print("Proses pembayaran dilanjutkan");
+                            QuickAlert.show(
+                              context: context,
+                              type: QuickAlertType.success,
+                              title: 'Berhasil',
+                              text: "Berhasil Melakukan Booking No. Antrian",
+                              confirmBtnText: 'OK',
+                              confirmBtnColor: Colors.green,
+                            );
+                          } catch (e) {
+                            QuickAlert.show(
+                              context: context,
+                              type: QuickAlertType.error,
+                              title: 'Terjadi Kesalahan',
+                              text: "Gagal Melakukan Booking No. Antrian",
+                              confirmBtnText: 'OK',
+                              confirmBtnColor:
+                                  Theme.of(context).colorScheme.primary,
+                            );
+                          }
                         },
                         child: Text('Booking No. Antrian'),
                       ),
