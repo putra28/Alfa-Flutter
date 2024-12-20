@@ -224,7 +224,11 @@ class ISOMessageParsing {
       periodeLooping, // Periode looping (contoh: "JAN2024, FEB2024")
       formattedRPTAG, // Format rupiah untuk tagihan PLN
       formattedAdmin, // Format rupiah untuk admin bank
-      formattedTotBay // Format total bayar
+      formattedTotBay, // Format total bayar
+      totalAdmin,
+      RPTagPLN,
+      totalBayar,
+      idPelanggan
     ];
   }
 
@@ -241,6 +245,10 @@ class ISOMessageParsing {
         String formattedRPTAG = result[3];
         String formattedAdmin = result[4];
         String formattedTotBay = result[5];
+        int totalAdmin = result[6];
+        int RPTagPLN = result[7];
+        int totalBayar = result[8];
+        String idPelanggan = result[9];
 
         // Store result in shared preferences for session
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -250,8 +258,12 @@ class ISOMessageParsing {
         await prefs.setString('formattedRPTAG', formattedRPTAG);
         await prefs.setString('formattedAdmin', formattedAdmin);
         await prefs.setString('formattedTotBay', formattedTotBay);
+        await prefs.setInt('totalAdmin', totalAdmin);
+        await prefs.setInt('RPTagPLN', RPTagPLN);
+        await prefs.setInt('totalBayar', totalBayar);
+        await prefs.setString('idPelanggan', idPelanggan);
 
-        return "IDPEL: $idpel\n"
+        return "IDPEL: $idPelanggan\n"
                 "NAMA: $nama\n"
                 "TOTAL TAGIHAN: $totalTagihan\n"
                 "BL/TH: $periodeLooping\n"

@@ -6,6 +6,7 @@ import '../services/ISOMessageCreate.dart';
 import '../services/Postpaid_ISOMessageParsing.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/BookingAntrian.dart';
 
 class postpaid_screen extends StatefulWidget {
   const postpaid_screen({super.key});
@@ -51,8 +52,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
         _controller.clear();
       } else {
         setState(() {
-        _outputISOMessage = isoMessage;
-        _outputISOMessageParsing = parsingISO.trim();
+          _outputISOMessage = isoMessage;
+          _outputISOMessageParsing = parsingISO.trim();
         });
       }
       // try {
@@ -258,22 +259,64 @@ class _postpaid_screenState extends State<postpaid_screen> {
                         margin: EdgeInsets.symmetric(horizontal: width * 0.05),
                         height: height * 0.07,
                         child: ElevatedButton(
-                        onPressed: () async {
-                            // Logic untuk melanjutkan proses pembayaran
-                            SharedPreferences prefs = await SharedPreferences.getInstance();
-                            String? nama = prefs.getString('nama');
-                            int? totalTagihan = prefs.getInt('totalTagihan');
-                            String? periodeLooping = prefs.getString('periodeLooping');
-                            String? formattedRPTAG = prefs.getString('formattedRPTAG');
-                            String? formattedAdmin = prefs.getString('formattedAdmin');
-                            String? formattedTotBay = prefs.getString('formattedTotBay');
-                            print(nama);
-                            print(totalTagihan);
-                            print(periodeLooping);
-                            print(formattedRPTAG);
-                            print(formattedAdmin);
-                            print(formattedTotBay);
-                            print("Proses pembayaran dilanjutkan");
+                          onPressed: () async {
+                            try {
+                              // Logic untuk melanjutkan proses pembayaran
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                              String? Method = "Insert Antrian Postpaid";
+                              String? IDToko = prefs.getString('IDToko');
+                              String? idPelanggan =
+                                  prefs.getString('idPelanggan');
+                              String? nama = prefs.getString('nama');
+                              int? totalTagihan = prefs.getInt('totalTagihan');
+                              String? periodeLooping =
+                                  prefs.getString('periodeLooping');
+                              String? formattedRPTAG =
+                                  prefs.getString('formattedRPTAG');
+                              String? formattedAdmin =
+                                  prefs.getString('formattedAdmin');
+                              String? formattedTotBay =
+                                  prefs.getString('formattedTotBay');
+                              int? totalAdmin = prefs.getInt('totalAdmin');
+                              int? RPTagPLN = prefs.getInt('RPTagPLN');
+                              int? totalBayar = prefs.getInt('totalBayar');
+
+                              await BookingAntrian.bookingAntrian(
+                                Method!,
+                                IDToko!,
+                                totalBayar.toString(),
+                                idPelanggan!,
+                                RPTagPLN.toString(),
+                                totalAdmin.toString(),
+                                totalTagihan.toString(),
+                              );
+
+                              print("Kode Toko : $IDToko");
+                              print("Amount : $totalBayar");
+                              print("ID Pel : $idPelanggan");
+                              print("RP Tag : $RPTagPLN");
+                              print("Admin Total : $totalAdmin");
+                              print("Total Lembar : $totalTagihan");
+                              print("Proses pembayaran dilanjutkan");
+                              QuickAlert.show(
+                                context: context,
+                                type: QuickAlertType.success,
+                                title: 'Berhasil',
+                                text: "Berhasil Melakukan Booking No. Antrian",
+                                confirmBtnText: 'OK',
+                                confirmBtnColor: Colors.green,
+                              );
+                            } catch (e) {
+                              QuickAlert.show(
+                                context: context,
+                                type: QuickAlertType.error,
+                                title: 'Terjadi Kesalahan',
+                                text: "Gagal Melakukan Booking No. Antrian",
+                                confirmBtnText: 'OK',
+                                confirmBtnColor: Theme.of(context).colorScheme.primary,
+                              );
+                            }
                           },
                           child: Text('Booking No. Antrian'),
                         ),
@@ -284,7 +327,6 @@ class _postpaid_screenState extends State<postpaid_screen> {
               SizedBox(height: height * 0.01),
             ],
           ),
-        )
-    );
+        ));
   }
 }
