@@ -60,45 +60,77 @@ class _PrepaidScreenState extends State<prepaid_screen> {
       final isoMessage = processor.createIsoMessage(_controller.text);
       final isoMessagetoSent = 'XX' + isoMessage;
 
-      try {
-        String serverResponse = await processor
-            .sendISOMessage(isoMessagetoSent); // Asynchronous call
-        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-          final parsingISO = await processorParsing.printResponse(
-              serverResponse, _controller.text); // Await response here
-          if (parsingISO.startsWith("Terjadi Kesalahan")) {
-            String serverResponseClean =
-                parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-            QuickAlert.show(
-              context: context,
-              type: QuickAlertType.error,
-              title: 'Terjadi Kesalahan',
-              text: serverResponseClean,
-              confirmBtnText: 'OK',
-              confirmBtnColor: Theme.of(context).colorScheme.primary,
-            );
-            _controller.clear();
-          } else {
-            setState(() {
-              _outputISOMessageParsing = parsingISO;
-            });
-          }
-        } else {
-          String serverResponseClean =
-              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
-          QuickAlert.show(
-            context: context,
-            type: QuickAlertType.error,
-            title: 'Terjadi Kesalahan',
-            text: serverResponseClean,
-            confirmBtnText: 'OK',
-            confirmBtnColor: Theme.of(context).colorScheme.primary,
-          );
-          _controller.clear();
-        }
-      } catch (e) {
-        print('Error: $e');
+      final parsingISO = await processorParsing.printResponse(_controller.text);
+      if (parsingISO.startsWith("Terjadi Kesalahan")) {
+        String serverResponseClean =
+            parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Terjadi Kesalahan',
+          text: serverResponseClean,
+          confirmBtnText: 'OK',
+          confirmBtnColor: Theme.of(context).colorScheme.primary,
+        );
+        _controller.clear();
+      } else {
+        SharedPreferences prefs =
+            await SharedPreferences.getInstance();
+        String? Method = "Get Denom Prepaid";
+        String? IDToko = prefs.getString('IDToko');
+        Map<String, dynamic> dataToSend = {
+          "var_kdtoko": IDToko,
+        };
+        
+        await BookingAntrian.GetDenom(
+          Method!,
+          dataToSend!
+        );
+        setState(() {
+          _outputISOMessage = isoMessage;
+          _outputISOMessageParsing = parsingISO.trim();
+        });
       }
+
+      // try {
+      //   String serverResponse = await processor
+      //       .sendISOMessage(isoMessagetoSent); // Asynchronous call
+      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+      //     final parsingISO = await processorParsing.printResponse(
+      //         serverResponse, _controller.text); // Await response here
+      //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
+      //       String serverResponseClean =
+      //           parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+      //       QuickAlert.show(
+      //         context: context,
+      //         type: QuickAlertType.error,
+      //         title: 'Terjadi Kesalahan',
+      //         text: serverResponseClean,
+      //         confirmBtnText: 'OK',
+      //         confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //       );
+      //       _controller.clear();
+      //     } else {
+      //       setState(() {
+      //         _outputISOMessageParsing = parsingISO;
+      //       });
+      //     }
+      //   } else {
+      //     String serverResponseClean =
+      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+      //     QuickAlert.show(
+      //       context: context,
+      //       type: QuickAlertType.error,
+      //       title: 'Terjadi Kesalahan',
+      //       text: serverResponseClean,
+      //       confirmBtnText: 'OK',
+      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //     );
+      //     _controller.clear();
+      //   }
+      // } catch (e) {
+      //   print('Error: $e');
+      // }
     }
   }
 
@@ -318,12 +350,15 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                               Method!,
                               dataToSend!
                             );
-
-                            print("Kode Toko : $IDToko");
-                            print("ID Pel : $idpel");
-                            print("Denom : $_selectedDenom");
-                            print("Admin Total : $adminTotal");
-                            print("Proses pembayaran dilanjutkan");
+                            
+                            setState(() {
+                              _controller.clear();
+                              _outputISOMessageParsing = "";
+                              _selectedDenom = 0;
+                              _denomValue = "";
+                              _totalBayar = 0;
+                              _totBayarValue = "";
+                            });
                             QuickAlert.show(
                               context: context,
                               type: QuickAlertType.success,

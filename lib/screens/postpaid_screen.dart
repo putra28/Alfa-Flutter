@@ -59,7 +59,6 @@ class _postpaid_screenState extends State<postpaid_screen> {
       // try {
       //   String serverResponse =
       //       await processor.sendISOMessage(isoMessagetoSent);
-      //   print('Server Response: $serverResponse');
       //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
       //     final parsingISO =
       //         processorParsing.printResponse(serverResponse, _controller.text);
@@ -294,13 +293,10 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               await BookingAntrian.bookingAntrian(
                                   Method!, dataToSend!);
 
-                              print("Kode Toko : $IDToko");
-                              print("Amount : $totalBayar");
-                              print("ID Pel : $idPelanggan");
-                              print("RP Tag : $RPTagPLN");
-                              print("Admin Total : $totalAdmin");
-                              print("Total Lembar : $totalTagihan");
-                              print("Proses pembayaran dilanjutkan");
+                              setState(() {
+                                _controller.clear();
+                                _outputISOMessageParsing = "";
+                              });
                               QuickAlert.show(
                                 context: context,
                                 type: QuickAlertType.success,

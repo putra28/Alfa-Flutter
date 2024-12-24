@@ -44,6 +44,11 @@ def link_alfa():
             for param in required_params:
                 if param not in data:
                     return jsonify({"status": "error", "message": f"Parameter '{param}' harus diisi untuk Prepaid!"}), 400
+        elif method == "Get Denom Prepaid":
+            required_params = ['var_kdtoko']
+            for param in required_params:
+                if param not in data:
+                    return jsonify({"status": "error", "message": f"Parameter '{param}' harus diisi untuk Prepaid!"}), 400
         else:
             return jsonify({"status": "error", "message": "Method tidak dikenali!"}), 400
 
@@ -118,6 +123,34 @@ def link_alfa():
                 'rptag': rptag,
                 'admttl': admttl
             })
+        
+        elif method == "Get Denom Prepaid":
+            sql = """
+            SELECT ITEMID, ITEMVALUE
+            FROM M_SUBPRODUK
+            """
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            # Format hasil ke dalam bentuk JSON
+            denom_list = [{"itemid": row[0], "itemvalue": int(row[1])} for row in result]
+
+            # Urutkan berdasarkan itemvalue dari terkecil ke terbesar
+            denom_list_sorted = sorted(denom_list, key=lambda x: x['itemvalue'])
+
+            # Tutup koneksi
+            cursor.close()
+            connection.close()
+
+            denom_response = OrderedDict({
+                "status": "success",
+                "message": "Data denom berhasil diambil dan diurutkan.",
+                "datetime": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "data": denom_list_sorted,
+            })
+            
+            denom_json = json.dumps(denom_response, ensure_ascii=False, indent=4)
+            return Response(denom_json, content_type='application/json', status=200)
 
         # Commit perubahan
         connection.commit()

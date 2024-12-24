@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,8 +26,14 @@ class ISOMessageParsing {
 
   // PROSES DEFINISIKAN ISO RESPONSE
   // PANJANG LOOPING SESUAI DENGAN PANJANG KARAKTER BIT48, TOTAL JUMLAH TAGIHAN
-  Future<String> printResponse(String serverResponse, String idpel) async {
+  Future<String> printResponse(String idpel) async {
     try {
+      String serverResponse =
+          "XX0210723A40010AC180040553502380000000000000000121816015700743416015712181219602116ALN32SATPZ01P333000000000001"+
+          "0054ALF001201000145100000"+
+          "133JTL53L31410161770054211122882209362F3DDA3824510B3BF68DE226117952ALF210Z25355EED4B315710A05D1B2BDEV SAT PREPAID          R3  000007700360"+
+          "0505454211               0000000000000000000000000000";
+          // 0000020000050000000000200000
       print("Contoh Response: $serverResponse");
       // Tunggu hasil dari parseISOResponse yang bisa asinkron
       return await parseISOResponse(serverResponse, idpel);
@@ -118,6 +125,39 @@ class ISOMessageParsing {
     }
   }
 
+static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
+  if (dataPerulanganVal.isNotEmpty) {
+    // Create denomUnsold array
+    List<Map<String, dynamic>> denomUnsold = [];
+    Map<int, String> itemValueToIdMap = {
+      20000: "20Rb USLD",
+      50000: "50Rb USLD",
+      100000: "100Rb USLD",
+      200000: "200Rb USLD",
+      500000: "500Rb USLD",
+      1000000: "1Jt USLD",
+      5000000: "5Jt USLD",
+      10000000: "10Jt USLD",
+      50000000: "50Jt USLD",
+    };
+
+    for (int value in dataPerulanganVal) {
+      String? itemid = itemValueToIdMap[value];
+      if (itemid != null) {
+        denomUnsold.add({"itemid": itemid, "itemvalue": value});
+      }
+    }
+
+    // Save denomUnsold to session
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('denomUnsold', jsonEncode(denomUnsold));
+
+    // Print the result for debugging
+    print(jsonEncode(denomUnsold));
+  } else {
+    print("dataPerulanganVal is empty.");
+  }
+}
   static Future<String> processResponseCode(
       String bit39, String idpel, String? bit48, String? bit62) async {
     if (bit39 == '00') {
@@ -126,13 +166,25 @@ class ISOMessageParsing {
         if (bit62 != null) {
           List<dynamic> result62 = parseBit62(bit62);
           List<int> dataPerulanganVal = result62[4];
-          if (dataPerulanganVal != 0) {
-            String perulangan = "";
-            for (int i = 0; i < dataPerulanganVal.length; i++) {
-              perulangan += "${dataPerulanganVal[i]}\n";
+          if (dataPerulanganVal.isNotEmpty) {
+          try {
+              List<int> denomPerulanganVal = dataPerulanganVal.where((value) => value != null).toList();
+
+              await processPerulangan(denomPerulanganVal);
+            } catch (e) {
+              print("Error processing denom values: $e");
             }
-            print(perulangan);
           }
+          // if (dataPerulanganVal != 0) {
+          //   String perulangan = "";
+          //   for (int i = 0; i < dataPerulanganVal.length; i++) {
+          //     perulangan += "${dataPerulanganVal[i]}\n";
+          //   }
+          //   List<int> denomPerulanganVal = perulangan.split("\n").map(int.parse).toList();
+          //   print(perulangan);
+          //   await processPerulangan(denomPerulanganVal);
+          // }
+          
           String idpel = result[0];
           String nama = result[1];
           String nometer = result[2];
@@ -156,6 +208,23 @@ class ISOMessageParsing {
       switch (bit39) {
         case '09':
           return 'Terjadi Kesalahan: NO. METER / IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+        case '14':
+          return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+        case '63':
+        case '16':
+          return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
+        case '18':
+          return 'Terjadi Kesalahan: TIMEOUT';
+        case '47':
+          return 'Terjadi Kesalahan: TOTAL KWH MELEBIHI BATAS MAKSIMUM';
+        case '77':
+          return 'Terjadi Kesalahan: NO. METER YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+        case '78':
+          return 'Terjadi Kesalahan: NO. METER / IDPEL TIDAK DIIZINKAN UNTUK MELAKUKAN PEMBELIAN, HUBUNGI PLN TERDEKAT';
+        case '82':
+          return 'Terjadi Kesalahan: TAGIHAN BELUM TERSEDIA';
+        case '90':
+          return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
         // Handle other error codes here...
         default:
           return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
@@ -195,7 +264,9 @@ class ISOMessageParsing {
     currentIndex += 15;
     String totalUnsold = bit62.substring(currentIndex, currentIndex + 6);
     currentIndex += 6;
-    String totalUnsoldClean = totalUnsold == '000000' ? '0' : totalUnsold.replaceFirst(RegExp(r'^0+'), '');
+    String totalUnsoldClean = totalUnsold == '000000'
+        ? '0'
+        : totalUnsold.replaceFirst(RegExp(r'^0+'), '');
     int totalUnsoldVal = int.parse(totalUnsoldClean);
 
     List<String> dataPerulangan = [];
