@@ -350,7 +350,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                               Method!,
                               dataToSend!
                             );
-                            
+
                             setState(() {
                               _controller.clear();
                               _outputISOMessageParsing = "";
@@ -362,8 +362,8 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             QuickAlert.show(
                               context: context,
                               type: QuickAlertType.success,
-                              title: 'Berhasil',
-                              text: "Berhasil Melakukan Booking No. Antrian",
+                              title: 'Berhasil Melakukan Booking No. Antrian',
+                              text: "No. Antrian : ${prefs.getString('noantrian')}",
                               confirmBtnText: 'OK',
                               confirmBtnColor: Colors.green,
                             );

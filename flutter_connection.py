@@ -58,71 +58,133 @@ def link_alfa():
 
         # SQL untuk Postpaid
         if method == "Insert Antrian Postpaid":
-            sql = """
+            # Query untuk mendapatkan NOANTRIAN terbaru
+            noantrian_sql = """
+            SELECT NVL(MAX(NOANTRIAN), 0) + 1 AS NOANTRIAN
+            FROM M_NOANTRIAN
+            WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = :kdtoko
+            """
+            cursor.execute(noantrian_sql, {'kdtoko': kdtoko})
+            noantrian = cursor.fetchone()[0]
+        
+            # Query untuk melakukan INSERT
+            insert_sql = """
             INSERT INTO M_NOANTRIAN (
                 TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
-            ) 
-            SELECT 
-                TO_CHAR(SYSDATE, 'YYYYMMDD') TGL,
-                :kdtoko KDTOKO,
-                '11101' PRODUCT_ID,
-                '0' DENOM_ID,
-                :amount AMOUNT,
-                (SELECT DECODE(Q1.NOANTRIAN, '', 1, Q1.NOANTRIAN + 1) NOANTRIAN
-                 FROM (
-                     SELECT SUM(1) NOANTRIAN 
-                     FROM M_NOANTRIAN
-                     WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = :kdtoko
-                 ) Q1) NOANTRIAN,
-                :idpel IDPEL,
-                :rptag TAGIHAN,
-                :admttl ADMIN,
-                :lop LBR
-            FROM DUAL
+            )
+            VALUES (
+                TO_CHAR(SYSDATE, 'YYYYMMDD'), :kdtoko, '11101', '0', :amount, :noantrian, 
+                :idpel, :rptag, :admttl, :lop
+            )
             """
-
-            cursor.execute(sql, {
+            cursor.execute(insert_sql, {
                 'kdtoko': kdtoko,
                 'amount': amount,
+                'noantrian': noantrian,
                 'idpel': idpel,
                 'rptag': rptag,
                 'admttl': admttl,
                 'lop': lop
             })
+        # if method == "Insert Antrian Postpaid":
+        #     sql = """
+        #     INSERT INTO M_NOANTRIAN (
+        #         TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
+        #     ) 
+        #     SELECT 
+        #         TO_CHAR(SYSDATE, 'YYYYMMDD') TGL,
+        #         :kdtoko KDTOKO,
+        #         '11101' PRODUCT_ID,
+        #         '0' DENOM_ID,
+        #         :amount AMOUNT,
+        #         (SELECT DECODE(Q1.NOANTRIAN, '', 1, Q1.NOANTRIAN + 1) NOANTRIAN
+        #          FROM (
+        #              SELECT SUM(1) NOANTRIAN 
+        #              FROM M_NOANTRIAN
+        #              WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = :kdtoko
+        #          ) Q1) NOANTRIAN,
+        #         :idpel IDPEL,
+        #         :rptag TAGIHAN,
+        #         :admttl ADMIN,
+        #         :lop LBR
+        #     FROM DUAL
+        #     """
+
+        #     cursor.execute(sql, {
+        #         'kdtoko': kdtoko,
+        #         'amount': amount,
+        #         'idpel': idpel,
+        #         'rptag': rptag,
+        #         'admttl': admttl,
+        #         'lop': lop
+        #     })
 
         # SQL untuk Prepaid
         elif method == "Insert Antrian Prepaid":
-            sql = """
+            # Query untuk mendapatkan NOANTRIAN terbaru
+            noantrian_sql = """
+            SELECT NVL(MAX(NOANTRIAN), 0) + 1 AS NOANTRIAN
+            FROM M_NOANTRIAN
+            WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = :kdtoko
+            """
+            cursor.execute(noantrian_sql, {'kdtoko': kdtoko})
+            noantrian = cursor.fetchone()[0]
+
+            insert_sql = """
             INSERT INTO M_NOANTRIAN (
                 TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
             )
-            SELECT 
-                TO_CHAR(SYSDATE, 'YYYYMMDD') TGL,
-                :kdtoko KDTOKO,
-                '11102' PRODUCT_ID,
-                :denom DENOM_ID,
-                :denom AMOUNT,
-                (SELECT DECODE(Q1.NOANTRIAN, '', 1, Q1.NOANTRIAN + 1) NOANTRIAN 
-                 FROM (
-                     SELECT SUM(1) NOANTRIAN 
-                     FROM M_NOANTRIAN 
-                     WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = :kdtoko
-                 ) Q1) NOANTRIAN,
-                :idpel IDPEL,
-                :rptag TAGIHAN,
-                :admttl ADMIN,
-                '1' LBR
-            FROM DUAL
+            VALUES (
+                TO_CHAR(SYSDATE, 'YYYYMMDD'), :kdtoko, '11102', :denom, :denom, :noantrian, 
+                :idpel, :rptag, :admttl, '1'
+            )
             """
 
             rptag = denom - admttl  # Menghitung rptag berdasarkan denom dan admttl
-            cursor.execute(sql, {
+            cursor.execute(insert_sql, {
                 'kdtoko': kdtoko,
                 'denom': denom,
                 'idpel': idpel,
                 'rptag': rptag,
-                'admttl': admttl
+                'admttl': admttl,
+                'noantrian': noantrian
             })
+        # elif method == "Insert Antrian Prepaid":
+        #     sql = """
+        #     INSERT INTO M_NOANTRIAN (
+        #         TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
+        #     )
+        #     SELECT 
+        #         TO_CHAR(SYSDATE, 'YYYYMMDD') TGL,
+        #         :kdtoko KDTOKO,
+        #         '11102' PRODUCT_ID,
+        #         :denom DENOM_ID,
+        #         :denom AMOUNT,
+        #         (SELECT DECODE(Q1.NOANTRIAN, '', 1, Q1.NOANTRIAN + 1) NOANTRIAN 
+        #          FROM (
+        #              SELECT SUM(1) NOANTRIAN 
+        #              FROM M_NOANTRIAN 
+        #              WHERE TANGGAL = TO_CHAR(SYSDATE, 'YYYYMMDD') AND KDTOKO = :kdtoko
+        #          ) Q1) NOANTRIAN,
+        #         :idpel IDPEL,
+        #         :rptag TAGIHAN,
+        #         :admttl ADMIN,
+        #         '1' LBR
+        #     FROM DUAL
+        #     RETURNING NOANTRIAN INTO :out_noantrian
+        #     """
+
+        #     rptag = denom - admttl  # Menghitung rptag berdasarkan denom dan admttl
+        #     noantrian_var = cursor.var(cx_Oracle.NUMBER)
+        #     cursor.execute(sql, {
+        #         'kdtoko': kdtoko,
+        #         'denom': denom,
+        #         'idpel': idpel,
+        #         'rptag': rptag,
+        #         'admttl': admttl,
+        #         'out_noantrian': noantrian_var
+        #     })
+        #     noantrian = noantrian_var.getvalue()
         
         elif method == "Get Denom Prepaid":
             sql = """
@@ -162,7 +224,8 @@ def link_alfa():
         return jsonify({
             "status": "success",
             "message": f"Data berhasil disimpan dengan method {method}!",
-            "datetime": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            "datetime": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "noantrian": int(noantrian)
         })
 
     except cx_Oracle.DatabaseError as e:
