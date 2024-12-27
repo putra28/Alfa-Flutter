@@ -69,7 +69,7 @@ class _CustomRadioWidgetState extends State<CustomRadioWidget> {
             borderRadius: BorderRadius.circular(8),
           ),
           side: BorderSide(
-            color: (_value == harga) ? Theme.of(context).colorScheme.primary : Colors.black,
+            color: (_value == text) ? Theme.of(context).colorScheme.primary : Colors.black,
           ),
         ),
         child: Text(
@@ -77,7 +77,7 @@ class _CustomRadioWidgetState extends State<CustomRadioWidget> {
           style: GoogleFonts.dongle(
             textStyle: TextStyle(
               fontSize: 22,
-              color: (_value == harga) ? Theme.of(context).colorScheme.primary : Colors.black,
+              color: (_value == text) ? Theme.of(context).colorScheme.primary : Colors.black,
             ),
           ),
         ),

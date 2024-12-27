@@ -44,6 +44,17 @@ class _PrepaidScreenState extends State<prepaid_screen> {
 
   // Modify the _handleSubmit method to handle asynchronous operations properly
   void _handleSubmit() async {
+    if (_controller.text.length < 11) {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Terjadi Kesalahan',
+        text: 'No. Meter / ID Pelanggan Tidak Valid',
+        confirmBtnText: 'OK',
+        confirmBtnColor: Theme.of(context).colorScheme.primary,
+      );
+      return;
+    }
     if (_controller.text.isEmpty) {
       QuickAlert.show(
         context: context,
@@ -74,18 +85,14 @@ class _PrepaidScreenState extends State<prepaid_screen> {
         );
         _controller.clear();
       } else {
-        SharedPreferences prefs =
-            await SharedPreferences.getInstance();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
         String? Method = "Get Denom Prepaid";
         String? IDToko = prefs.getString('IDToko');
         Map<String, dynamic> dataToSend = {
           "var_kdtoko": IDToko,
         };
-        
-        await BookingAntrian.GetDenom(
-          Method!,
-          dataToSend!
-        );
+
+        await BookingAntrian.GetDenom(Method!, dataToSend!);
         setState(() {
           _outputISOMessage = isoMessage;
           _outputISOMessageParsing = parsingISO.trim();
@@ -201,7 +208,13 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'No. Meter / ID Pelanggan',
+                        labelStyle: GoogleFonts.dongle(
+                          textStyle: TextStyle(
+                            fontSize: width * 0.06,
+                          ),
+                        ),
                       ),
+                      keyboardType: TextInputType.number,
                     ),
                   ),
                 ),
@@ -211,8 +224,19 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                     margin: EdgeInsets.only(right: width * 0.05),
                     height: height * 0.07,
                     child: ElevatedButton(
-                      onPressed: _handleSubmit,
-                      child: Text('Cek'),
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        _handleSubmit();
+                      },
+                      child: Text(
+                        'Cek',
+                        style: GoogleFonts.dongle(
+                          textStyle: TextStyle(
+                            fontSize: width * 0.06,
+                            color: const Color.fromARGB(255, 255, 255, 255),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -320,7 +344,15 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             _totBayarValue = "";
                           });
                         },
-                        child: Text('Clear Data'),
+                        child: Text(
+                          'Clear Data',
+                          style: GoogleFonts.dongle(
+                            textStyle: TextStyle(
+                              fontSize: width * 0.06,
+                              color: const Color.fromARGB(255, 255, 255, 255),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -330,7 +362,24 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                       height: height * 0.07,
                       child: ElevatedButton(
                         onPressed: () async {
+                          FocusScope.of(context).unfocus();
                           try {
+                            if (_selectedDenom == 0) {
+                              QuickAlert.show(
+                                context: context,
+                                type: QuickAlertType.error,
+                                title: 'Terjadi Kesalahan',
+                                text: 'Denom Tidak Boleh Kosong',
+                                confirmBtnText: 'OK',
+                                confirmBtnColor:
+                                    Theme.of(context).colorScheme.primary,
+                                // onConfirmBtnTap: () {
+                                //   FocusScope.of(context).unfocus();
+                                //   return;
+                                // },
+                              );
+                              return;
+                            }
                             // Logic untuk melanjutkan proses pembayaran
                             SharedPreferences prefs =
                                 await SharedPreferences.getInstance();
@@ -347,9 +396,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             };
 
                             await BookingAntrian.bookingAntrian(
-                              Method!,
-                              dataToSend!
-                            );
+                                Method!, dataToSend!);
 
                             setState(() {
                               _controller.clear();
@@ -363,7 +410,8 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                               context: context,
                               type: QuickAlertType.success,
                               title: 'Berhasil Melakukan Booking No. Antrian',
-                              text: "No. Antrian : ${prefs.getString('noantrian')}",
+                              text:
+                                  "No. Antrian : ${prefs.getString('noantrian')}",
                               confirmBtnText: 'OK',
                               confirmBtnColor: Colors.green,
                             );
@@ -379,7 +427,16 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             );
                           }
                         },
-                        child: Text('Booking No. Antrian'),
+                        child: Text(
+                          'Booking No. Antrian',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.dongle(
+                            textStyle: TextStyle(
+                              fontSize: width * 0.06,
+                              color: const Color.fromARGB(255, 255, 255, 255),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),

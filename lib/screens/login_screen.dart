@@ -116,7 +116,15 @@ class _LoginState extends State<Login> {
                     height: 54,
                     child: ElevatedButton(
                       onPressed: _handleSubmit,
-                      child: Text('Login'),
+                      child: Text(
+                        'Login',
+                        style: GoogleFonts.dongle(
+                          textStyle: TextStyle(
+                            fontSize: width * 0.06,
+                            color: const Color.fromARGB(255, 255, 255, 255),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),

@@ -21,6 +21,17 @@ class _postpaid_screenState extends State<postpaid_screen> {
   String _outputISOMessageParsing = "";
 
   void _handleSubmit() async {
+    if (_controller.text.length < 12) {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Terjadi Kesalahan',
+        text: 'ID Pelanggan Tidak Valid',
+        confirmBtnText: 'OK',
+        confirmBtnColor: Theme.of(context).colorScheme.primary,
+      );
+      return;
+    }
     if (_controller.text.isEmpty) {
       QuickAlert.show(
         context: context,
@@ -165,7 +176,13 @@ class _postpaid_screenState extends State<postpaid_screen> {
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'ID Pelanggan',
+                          labelStyle: GoogleFonts.dongle(
+                            textStyle: TextStyle(
+                              fontSize: width * 0.06,
+                            ),
+                          ),
                         ),
+                      keyboardType: TextInputType.number,
                       ),
                     ),
                   ),
@@ -175,7 +192,10 @@ class _postpaid_screenState extends State<postpaid_screen> {
                       margin: EdgeInsets.only(right: width * 0.05),
                       height: height * 0.07,
                       child: ElevatedButton(
-                        onPressed: _handleSubmit,
+                        onPressed: () {
+                          FocusScope.of(context).unfocus();
+                          _handleSubmit();
+                        },
                         child: Text('Cek'),
                       ),
                     ),
@@ -249,7 +269,14 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               _outputISOMessageParsing = "";
                             });
                           },
-                          child: Text('Clear Data'),
+                          child: Text('Clear Data',
+                            style: GoogleFonts.dongle(
+                              textStyle: TextStyle(
+                                fontSize: width * 0.06,
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -317,7 +344,15 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               );
                             }
                           },
-                          child: Text('Booking No. Antrian'),
+                          child: Text('Booking No. Antrian',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.dongle(
+                              textStyle: TextStyle(
+                                fontSize: width * 0.06,
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
