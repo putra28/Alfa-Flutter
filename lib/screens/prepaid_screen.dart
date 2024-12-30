@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import '../widgets/CustomRadioWidget.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/BookingAntrian.dart';
+import '../services/InquiryServices.dart';
 
 class prepaid_screen extends StatefulWidget {
   const prepaid_screen({super.key});
@@ -67,77 +69,90 @@ class _PrepaidScreenState extends State<prepaid_screen> {
       return;
     } else {
       final processor = Isomessagecreate();
+      final processorInquiry = InquiryServices();
       final processorParsing = ISOMessageParsing();
       final isoMessage = processor.createIsoMessage(_controller.text);
       final isoMessagetoSent = 'XX' + isoMessage;
 
-      final parsingISO = await processorParsing.printResponse(_controller.text);
-      if (parsingISO.startsWith("Terjadi Kesalahan")) {
-        String serverResponseClean =
-            parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-        QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: 'Terjadi Kesalahan',
-          text: serverResponseClean,
-          confirmBtnText: 'OK',
-          confirmBtnColor: Theme.of(context).colorScheme.primary,
-        );
-        _controller.clear();
-      } else {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        String? Method = "Get Denom Prepaid";
-        String? IDToko = prefs.getString('IDToko');
-        Map<String, dynamic> dataToSend = {
-          "var_kdtoko": IDToko,
-        };
+      // final parsingISO = await processorParsing.printResponse(_controller.text);
+      // if (parsingISO.startsWith("Terjadi Kesalahan")) {
+      //   String serverResponseClean =
+      //       parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+      //   QuickAlert.show(
+      //     context: context,
+      //     type: QuickAlertType.error,
+      //     title: 'Terjadi Kesalahan',
+      //     text: serverResponseClean,
+      //     confirmBtnText: 'OK',
+      //     confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //   );
+      //   _controller.clear();
+      // } else {
+      //   SharedPreferences prefs = await SharedPreferences.getInstance();
+      //   String? Method = "Get Denom Prepaid";
+      //   String? IDToko = prefs.getString('IDToko');
+      //   Map<String, dynamic> dataToSend = {
+      //     "var_kdtoko": IDToko,
+      //   };
 
-        await BookingAntrian.GetDenom(Method!, dataToSend!);
-        setState(() {
-          _outputISOMessage = isoMessage;
-          _outputISOMessageParsing = parsingISO.trim();
-        });
-      }
-
-      // try {
-      //   String serverResponse = await processor
-      //       .sendISOMessage(isoMessagetoSent); // Asynchronous call
-      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-      //     final parsingISO = await processorParsing.printResponse(
-      //         serverResponse, _controller.text); // Await response here
-      //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
-      //       String serverResponseClean =
-      //           parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-      //       QuickAlert.show(
-      //         context: context,
-      //         type: QuickAlertType.error,
-      //         title: 'Terjadi Kesalahan',
-      //         text: serverResponseClean,
-      //         confirmBtnText: 'OK',
-      //         confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //       );
-      //       _controller.clear();
-      //     } else {
-      //       setState(() {
-      //         _outputISOMessageParsing = parsingISO;
-      //       });
-      //     }
-      //   } else {
-      //     String serverResponseClean =
-      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+      //   try {
+      //     await BookingAntrian.GetDenom(Method!, dataToSend!);
+      //   } catch (e) {
       //     QuickAlert.show(
       //       context: context,
       //       type: QuickAlertType.error,
       //       title: 'Terjadi Kesalahan',
-      //       text: serverResponseClean,
+      //       text: 'Gagal terkoneksi dengan server',
       //       confirmBtnText: 'OK',
       //       confirmBtnColor: Theme.of(context).colorScheme.primary,
       //     );
-      //     _controller.clear();
+      //     return;
       //   }
-      // } catch (e) {
-      //   print('Error: $e');
+      //   setState(() {
+      //     _outputISOMessage = isoMessage;
+      //     _outputISOMessageParsing = parsingISO.trim();
+      //   });
       // }
+
+      try {
+        String serverResponse = await processorInquiry
+            .sendISOMessage(isoMessagetoSent); // Asynchronous call
+        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+          final parsingISO = await processorParsing.printResponse(
+              serverResponse, _controller.text); // Await response here
+          if (parsingISO.startsWith("Terjadi Kesalahan")) {
+            String serverResponseClean =
+                parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+            QuickAlert.show(
+              context: context,
+              type: QuickAlertType.error,
+              title: 'Terjadi Kesalahan',
+              text: serverResponseClean,
+              confirmBtnText: 'OK',
+              confirmBtnColor: Theme.of(context).colorScheme.primary,
+            );
+            _controller.clear();
+          } else {
+            setState(() {
+              _outputISOMessageParsing = parsingISO;
+            });
+          }
+        } else {
+          String serverResponseClean =
+              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'Terjadi Kesalahan',
+            text: serverResponseClean,
+            confirmBtnText: 'OK',
+            confirmBtnColor: Theme.of(context).colorScheme.primary,
+          );
+          _controller.clear();
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
     }
   }
 
@@ -210,7 +225,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                         labelText: 'No. Meter / ID Pelanggan',
                         labelStyle: GoogleFonts.dongle(
                           textStyle: TextStyle(
-                            fontSize: width * 0.06,
+                            fontSize: width * 0.05,
                           ),
                         ),
                       ),
@@ -232,7 +247,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                         'Cek',
                         style: GoogleFonts.dongle(
                           textStyle: TextStyle(
-                            fontSize: width * 0.06,
+                            fontSize: width * 0.05,
                             color: const Color.fromARGB(255, 255, 255, 255),
                           ),
                         ),
@@ -272,7 +287,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             text: 'PLN Prepaid \n',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.06,
+                                fontSize: width * 0.05,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
@@ -348,7 +363,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                           'Clear Data',
                           style: GoogleFonts.dongle(
                             textStyle: TextStyle(
-                              fontSize: width * 0.06,
+                              fontSize: width * 0.05,
                               color: const Color.fromARGB(255, 255, 255, 255),
                             ),
                           ),
@@ -432,7 +447,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                           textAlign: TextAlign.center,
                           style: GoogleFonts.dongle(
                             textStyle: TextStyle(
-                              fontSize: width * 0.06,
+                              fontSize: width * 0.05,
                               color: const Color.fromARGB(255, 255, 255, 255),
                             ),
                           ),

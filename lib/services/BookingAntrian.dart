@@ -57,7 +57,8 @@ class BookingAntrian {
       }
     } else {
       print('Gagal mendapatkan data');
-      throw Exception('Gagal mendapatkan data: ${response.statusCode}');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('denomData', 'Gagal Mendapatkan Denom');
     }
   }
 }

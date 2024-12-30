@@ -105,6 +105,11 @@ class _LoginState extends State<Login> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'ID Toko',
+                        labelStyle: GoogleFonts.dongle(
+                          textStyle: TextStyle(
+                            fontSize: width * 0.05,
+                          ),
+                        )
                       ),
                     ),
                   ),
@@ -120,7 +125,7 @@ class _LoginState extends State<Login> {
                         'Login',
                         style: GoogleFonts.dongle(
                           textStyle: TextStyle(
-                            fontSize: width * 0.06,
+                            fontSize: width * 0.04,
                             color: const Color.fromARGB(255, 255, 255, 255),
                           ),
                         ),

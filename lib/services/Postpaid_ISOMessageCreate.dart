@@ -7,22 +7,9 @@ class Isomessagecreate {
     // Menggunakan bitmap dari PostpaidBitmap
     String isoBitmap = PostpaidBitmap.buildIsoBitmap();
 
-    // Hitung panjang dari inputValue
-    int inputValueLength = inputValue.length;
-
-    // Buat variabel bit48Prepaid berdasarkan panjang inputValue
-    String bit48Prepaid;
-    if (inputValueLength == 11) {
-      bit48Prepaid = 'JTL53L3$inputValue' + '0000000000000';
-    } else if (inputValueLength == 12) {
-      bit48Prepaid = 'JTL53L300000000000$inputValue' + '1';
-    } else {
-      throw Exception('Panjang inputValue tidak valid');
-    }
-
     // Elemen-elemen ISO message
     String mti = "0200";
-    String bit2 = "53502"; //ubah 53501 postpaid //53504 nontaglis
+    String bit2 = "14501"; //ubah 53502 prepaid //53504 nontaglis
     String bit3 = "380000";
     String bit7 = _currentTimestamp("MMddHHmmss");
     String bit11 = "007434";
@@ -33,8 +20,8 @@ class Isomessagecreate {
     String bit32 = "ALN32SATPZ01P333";
     String bit37 = "000000000001";
     String bit41 = "54ALF001";
-    String bit42 = "201000145100000031";
-    String bit48 = bit48Prepaid; // Input pelanggan
+    String bit42 = "201000145100000012";
+    String bit48 = inputValue; // Input pelanggan
     String bit49 = "360";
     String endMessage = "\u0003";
 
@@ -62,6 +49,7 @@ class Isomessagecreate {
         bit48 +
         bit49 +
         endMessage;
+
     return isoMessage;
   }
 

@@ -2,11 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/ISOMessageCreate.dart';
+import '../services/Postpaid_ISOMessageCreate.dart';
 import '../services/Postpaid_ISOMessageParsing.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/BookingAntrian.dart';
+import '../services/InquiryServices.dart';
 
 class postpaid_screen extends StatefulWidget {
   const postpaid_screen({super.key});
@@ -44,68 +45,70 @@ class _postpaid_screenState extends State<postpaid_screen> {
       return;
     } else {
       final processor = Isomessagecreate();
+      final processorInquiry = InquiryServices();
       final processorParsing = ISOMessageParsing();
       final isoMessage = processor.createIsoMessage(_controller.text);
       final isoMessagetoSent = 'XX' + isoMessage;
 
-      final parsingISO = await processorParsing.printResponse(_controller.text);
-      if (parsingISO.startsWith("Terjadi Kesalahan")) {
-        String serverResponseClean =
-            parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-        QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: 'Terjadi Kesalahan',
-          text: serverResponseClean,
-          confirmBtnText: 'OK',
-          confirmBtnColor: Theme.of(context).colorScheme.primary,
-        );
-        _controller.clear();
-      } else {
-        setState(() {
-          _outputISOMessage = isoMessage;
-          _outputISOMessageParsing = parsingISO.trim();
-        });
-      }
-      // try {
-      //   String serverResponse =
-      //       await processor.sendISOMessage(isoMessagetoSent);
-      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-      //     final parsingISO =
-      //         processorParsing.printResponse(serverResponse, _controller.text);
-      //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
-      //       String serverResponseClean =
-      //           parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-      //       QuickAlert.show(
-      //         context: context,
-      //         type: QuickAlertType.error,
-      //         title: 'Terjadi Kesalahan',
-      //         text: serverResponseClean,
-      //         confirmBtnText: 'OK',
-      //         confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //       );
-      //       _controller.clear();
-      //     } else {
-      //       setState(() {
-      //         _outputISOMessageParsing = parsingISO;
-      //       });
-      //     }
-      //   } else {
-      //     String serverResponseClean =
-      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
-      //     QuickAlert.show(
-      //       context: context,
-      //       type: QuickAlertType.error,
-      //       title: 'Terjadi Kesalahan',
-      //       text: serverResponseClean,
-      //       confirmBtnText: 'OK',
-      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //     );
-      //     _controller.clear();
-      //   }
-      // } catch (e) {
-      //   print('Error: $e');
+      // final parsingISO = await processorParsing.printResponse(_controller.text);
+      // if (parsingISO.startsWith("Terjadi Kesalahan")) {
+      //   String serverResponseClean =
+      //       parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+      //   QuickAlert.show(
+      //     context: context,
+      //     type: QuickAlertType.error,
+      //     title: 'Terjadi Kesalahan',
+      //     text: serverResponseClean,
+      //     confirmBtnText: 'OK',
+      //     confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //   );
+      //   _controller.clear();
+      // } else {
+      //   setState(() {
+      //     _outputISOMessage = isoMessage;
+      //     _outputISOMessageParsing = parsingISO.trim();
+      //   });
       // }
+
+      try {
+        String serverResponse =
+            await processorInquiry.sendISOMessage(isoMessagetoSent);
+        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+          final parsingISO =
+              await processorParsing.printResponse(serverResponse, _controller.text);
+          if (parsingISO.startsWith("Terjadi Kesalahan")) {
+            String serverResponseClean =
+                parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+            QuickAlert.show(
+              context: context,
+              type: QuickAlertType.error,
+              title: 'Terjadi Kesalahan',
+              text: serverResponseClean,
+              confirmBtnText: 'OK',
+              confirmBtnColor: Theme.of(context).colorScheme.primary,
+            );
+            _controller.clear();
+          } else {
+            setState(() {
+              _outputISOMessageParsing = parsingISO;
+            });
+          }
+        } else {
+          String serverResponseClean =
+              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'Terjadi Kesalahan',
+            text: serverResponseClean,
+            confirmBtnText: 'OK',
+            confirmBtnColor: Theme.of(context).colorScheme.primary,
+          );
+          _controller.clear();
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
     }
   }
 
@@ -178,7 +181,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                           labelText: 'ID Pelanggan',
                           labelStyle: GoogleFonts.dongle(
                             textStyle: TextStyle(
-                              fontSize: width * 0.06,
+                              fontSize: width * 0.05,
                             ),
                           ),
                         ),
@@ -233,7 +236,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               text: 'PLN Postpaid \n',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.06,
+                                  fontSize: width * 0.05,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -272,7 +275,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                           child: Text('Clear Data',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.06,
+                                fontSize: width * 0.05,
                                 color: const Color.fromARGB(255, 255, 255, 255),
                               ),
                             ),
@@ -348,7 +351,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                             textAlign: TextAlign.center,
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.06,
+                                fontSize: width * 0.05,
                                 color: const Color.fromARGB(255, 255, 255, 255),
                               ),
                             ),
