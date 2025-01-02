@@ -9,7 +9,7 @@ class Isomessagecreate {
 
     // Elemen-elemen ISO message
     String mti = "0200";
-    String bit2 = "14501"; //ubah 53502 prepaid //53504 nontaglis
+    String bit2 = "53504"; //ubah 53502 prepaid //53504 nontaglis
     String bit3 = "380000";
     String bit7 = _currentTimestamp("MMddHHmmss");
     String bit11 = "007434";
@@ -20,7 +20,7 @@ class Isomessagecreate {
     String bit32 = "ALN32SATPZ01P333";
     String bit37 = "000000000001";
     String bit41 = "54ALF001";
-    String bit42 = "201000145100000012";
+    String bit42 = "201000145100000013";
     String bit48 = inputValue; // Input pelanggan
     String bit49 = "360";
     String endMessage = "\u0003";
