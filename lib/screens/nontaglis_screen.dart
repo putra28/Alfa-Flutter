@@ -296,27 +296,18 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                               String? IDToko = prefs.getString('IDToko');
                               String? idPelanggan =
                                   prefs.getString('idPelanggan');
-                              String? nama = prefs.getString('nama');
                               int? totalTagihan = prefs.getInt('totalTagihan');
-                              String? periodeLooping =
-                                  prefs.getString('periodeLooping');
-                              String? formattedRPTAG =
-                                  prefs.getString('formattedRPTAG');
-                              String? formattedAdmin =
-                                  prefs.getString('formattedAdmin');
-                              String? formattedTotBay =
-                                  prefs.getString('formattedTotBay');
-                              int? totalAdmin = prefs.getInt('totalAdmin');
-                              int? RPTagPLN = prefs.getInt('RPTagPLN');
                               int? totalBayar = prefs.getInt('totalBayar');
+                              int? admin = prefs.getInt('admin');
+                              String? SCREF = prefs.getString('SCREF');
 
                               Map<String, dynamic> dataToSend = {
                                 "var_kdtoko": IDToko,
                                 "var_amount": totalBayar,
                                 "var_idpel": idPelanggan,
-                                "var_rptag": RPTagPLN,
-                                "var_admttl": totalAdmin,
-                                "var_lembar": totalTagihan
+                                "var_rptag": totalTagihan,
+                                "var_admttl": admin,
+                                "var_sc": SCREF
                               };
 
                               await BookingAntrian.bookingAntrian(

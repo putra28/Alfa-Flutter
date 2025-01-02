@@ -3,7 +3,7 @@ import 'dart:io';
 class InquiryServices {
   Future<String> sendISOMessage(String isoMessage) async {
     try {
-      final socket = await Socket.connect('168.168.10.175', 7101)
+      final socket = await Socket.connect('168.168.10.175', 7005) //7101
           .timeout(Duration(seconds: 5), onTimeout: () {
         throw Exception('Gagal terkoneksi dengan server');
       });
@@ -20,7 +20,7 @@ class InquiryServices {
           String responseChunk = String.fromCharCodes(data);
           responseBuffer.write(responseChunk);
           print(
-              'Received chunk: $responseChunk'); // Cetak data yang diterima (chunk)
+              'Received chunk: $responseChunk\n'); // Cetak data yang diterima (chunk)
         },
         onDone: () {
           print(

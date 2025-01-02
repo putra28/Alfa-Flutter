@@ -401,13 +401,15 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             String? Method = "Insert Antrian Prepaid";
                             String? IDToko = prefs.getString('IDToko');
                             String? idpel = prefs.getString('idpel');
-                            int? adminTotal = 2500;
+                            String? SCREF = prefs.getString('SCREF');
+                            int? adminTotal = 3500;
 
                             Map<String, dynamic> dataToSend = {
                               "var_kdtoko": IDToko,
                               "var_denom": _selectedDenom,
                               "var_idpel": idpel,
                               "var_admttl": adminTotal,
+                              "var_scref": SCREF,
                             };
 
                             await BookingAntrian.bookingAntrian(

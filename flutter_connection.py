@@ -32,20 +32,21 @@ def link_alfa():
         rptag = data.get('var_rptag')
         admttl = data.get('var_admttl')
         lop = data.get('var_lembar')
+        scref = data.get('var_scref')
 
         # Validasi data input untuk Postpaid dan Prepaid
         if method == "Insert Antrian Postpaid":
-            required_params = ['var_kdtoko', 'var_amount', 'var_idpel', 'var_rptag', 'var_admttl', 'var_lembar']
+            required_params = ['var_kdtoko', 'var_amount', 'var_idpel', 'var_rptag', 'var_admttl', 'var_lembar', 'var_scref']
             for param in required_params:
                 if param not in data:
                     return jsonify({"status": "error", "message": f"Parameter '{param}' harus diisi untuk Postpaid!"}), 400
         elif method == "Insert Antrian Prepaid":
-            required_params = ['var_kdtoko', 'var_denom', 'var_idpel', 'var_admttl']
+            required_params = ['var_kdtoko', 'var_denom', 'var_idpel', 'var_admttl', 'var_scref']
             for param in required_params:
                 if param not in data:
                     return jsonify({"status": "error", "message": f"Parameter '{param}' harus diisi untuk Prepaid!"}), 400
         elif method == "Insert Antrian Nontaglis":
-            required_params = ['var_kdtoko', 'var_amount', 'var_idpel', 'var_rptag', 'var_admttl']
+            required_params = ['var_kdtoko', 'var_amount', 'var_idpel', 'var_rptag', 'var_admttl', 'var_scref']
             for param in required_params:
                 if param not in data:
                     return jsonify({"status": "error", "message": f"Parameter '{param}' harus diisi untuk Prepaid!"}), 400
@@ -75,11 +76,11 @@ def link_alfa():
             # Query untuk melakukan INSERT
             insert_sql = """
             INSERT INTO M_NOANTRIAN (
-                TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
+                TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR, SCREF
             )
             VALUES (
                 TO_CHAR(SYSDATE, 'YYYYMMDD'), :kdtoko, '11101', '0', :amount, :noantrian, 
-                :idpel, :rptag, :admttl, :lop
+                :idpel, :rptag, :admttl, :lop, :scref
             )
             """
             cursor.execute(insert_sql, {
@@ -89,7 +90,8 @@ def link_alfa():
                 'idpel': idpel,
                 'rptag': rptag,
                 'admttl': admttl,
-                'lop': lop
+                'lop': lop,
+                'scref': scref
             })
 
         # SQL untuk Prepaid
@@ -105,11 +107,11 @@ def link_alfa():
 
             insert_sql = """
             INSERT INTO M_NOANTRIAN (
-                TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
+                TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR, SCREF
             )
             VALUES (
                 TO_CHAR(SYSDATE, 'YYYYMMDD'), :kdtoko, '11102', :denom, :denom, :noantrian, 
-                :idpel, :rptag, :admttl, '1'
+                :idpel, :rptag, :admttl, '1', :scref
             )
             """
 
@@ -120,7 +122,8 @@ def link_alfa():
                 'idpel': idpel,
                 'rptag': rptag,
                 'admttl': admttl,
-                'noantrian': noantrian
+                'noantrian': noantrian,
+                'scref': scref
             })
         
         # SQL untuk Nontaglis
@@ -137,11 +140,11 @@ def link_alfa():
             # Query untuk melakukan INSERT
             insert_sql = """
             INSERT INTO M_NOANTRIAN (
-                TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR
+                TANGGAL, KDTOKO, PRODUCT_ID, DENOM_ID, AMOUNT, NOANTRIAN, IDPEL, TAGIHAN, ADMIN, LBR, SCREF
             )
             VALUES (
                 TO_CHAR(SYSDATE, 'YYYYMMDD'), :kdtoko, '11104', '0', :amount, :noantrian, 
-                :idpel, :rptag, :admttl, '1'
+                :idpel, :rptag, :admttl, '1', :scref
             )
             """
             cursor.execute(insert_sql, {
@@ -150,7 +153,8 @@ def link_alfa():
                 'noantrian': noantrian,
                 'idpel': idpel,
                 'rptag': rptag,
-                'admttl': admttl
+                'admttl': admttl,
+                'scref': scref
             })
         
         elif method == "Get Denom Prepaid":

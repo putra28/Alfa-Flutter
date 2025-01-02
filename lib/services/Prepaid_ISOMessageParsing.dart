@@ -192,10 +192,12 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
           String nometer = result[2];
           String tarif = result[3];
           int daya = result[4];
+          String SCREF = result[5];
 
           // Store result in shared preferences for session
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('idpel', idpel);
+          await prefs.setString('SCREF', SCREF);
 
           return "NAMA: $nama\n"
               "NO. METER: $nometer\n"
@@ -243,6 +245,7 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
     currentIndex += 12;
     currentIndex += 1;
     currentIndex += 32;
+    String SCREF = bit48.substring(currentIndex, currentIndex + 32);
     currentIndex += 32;
     String nama = bit48.substring(currentIndex, currentIndex + 25);
     currentIndex += 25;
@@ -253,7 +256,7 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
     String dayaClean = daya.replaceFirst(RegExp(r'^0+'), '');
     int dayaVal = int.parse(dayaClean);
 
-    return [idpel, nama, nometer, tarif, dayaVal];
+    return [idpel, nama, nometer, tarif, dayaVal, SCREF];
   }
 
   static List<dynamic> parseBit62(String bit62) {

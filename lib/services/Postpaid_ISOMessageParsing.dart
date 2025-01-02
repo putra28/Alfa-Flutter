@@ -107,9 +107,12 @@ class ISOMessageParsing {
       }
     }
 
+    int latestCurrentIndex = currentIndex;
+
     // Proses Bit 39
     if (bit39 != null) {
-      return await processResponseCode(bit39, idpel, bit48);
+      return await processResponseCode(
+          bit39, idpel, bit48, latestCurrentIndex, isoMessage);
     } else {
       return "Bit 39 tidak ditemukan.";
     }
@@ -133,6 +136,7 @@ class ISOMessageParsing {
     // Jumlahkan Tagihan dengan sisa
     int totalTagihan = int.parse(jumlahTagihan) + int.parse(sisaTagihan);
     // 3. Scref (32 karakter)
+    String SCREF = bit48.substring(currentIndex, currentIndex + 32);
     currentIndex += 32;
     // 4. Nama (20 karakter)
     String nama = bit48.substring(currentIndex, currentIndex + 25).trim();
@@ -229,12 +233,13 @@ class ISOMessageParsing {
       totalAdmin,
       RPTagPLN,
       totalBayar,
-      idPelanggan
+      idPelanggan,
+      SCREF
     ];
   }
 
-  static Future<String> processResponseCode(
-      String bit39, String idpel, String? bit48) async {
+  static Future<String> processResponseCode(String bit39, String idpel,
+      String? bit48, int latestCurrentIndex, String isoMessage) async {
     if (bit39 == '00') {
       // Jika bit39 == '00', langsung kembalikan hasil dari parseBit48
       if (bit48 != null) {
@@ -250,19 +255,17 @@ class ISOMessageParsing {
         int RPTagPLN = result[7];
         int totalBayar = result[8];
         String idPelanggan = result[9];
+        String SCREF = result[10];
 
         // Store result in shared preferences for session
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('nama', nama);
         await prefs.setInt('totalTagihan', totalTagihan);
-        await prefs.setString('periodeLooping', periodeLooping);
-        await prefs.setString('formattedRPTAG', formattedRPTAG);
-        await prefs.setString('formattedAdmin', formattedAdmin);
-        await prefs.setString('formattedTotBay', formattedTotBay);
         await prefs.setInt('totalAdmin', totalAdmin);
         await prefs.setInt('RPTagPLN', RPTagPLN);
         await prefs.setInt('totalBayar', totalBayar);
         await prefs.setString('idPelanggan', idPelanggan);
+        await prefs.setString('SCREF', SCREF);
 
         return "IDPEL: $idPelanggan\n"
                 "NAMA: $nama\n"
@@ -279,24 +282,14 @@ class ISOMessageParsing {
         return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
       }
     } else {
-      // Kode yang ada sebelumnya
-      switch (bit39) {
-        case '14':
-          return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
-        case '82':
-          return 'Terjadi Kesalahan: TAGIHAN BULAN BERJALAN BELUM TERSEDIA';
-        case '90':
-          return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
-        case '63':
-        case '16':
-          return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
-        case '34':
-          return 'Terjadi Kesalahan: TAGIHAN SUDAH TERBAYAR';
-        case '18':
-          return 'Terjadi Kesalahan: TIMEOUT';
-        default:
-          return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
-      }
+      int lengthBit62 = int.parse(
+          isoMessage.substring(latestCurrentIndex, latestCurrentIndex + 3));
+      latestCurrentIndex += 3; // Pindah ke data setelah length
+      String value = isoMessage.substring(
+          latestCurrentIndex, latestCurrentIndex + lengthBit62);
+      latestCurrentIndex += lengthBit62;
+      String bit62 = value; // Varible Message bit62
+      return "Terjadi Kesalahan: $bit62";
     }
   }
 

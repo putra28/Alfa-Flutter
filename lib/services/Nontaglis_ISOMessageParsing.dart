@@ -30,7 +30,7 @@ class ISOMessageParsing {
       //     "XX0210723A40010AC180000553504380000000000394800010210133500743410133501020103602116ALN32SATPZ01P33300000000000100"+
       //     "54ALF0012010001451000001875363112222200MIGRASI PRABAYAR         2025010120250131536610029023DEV SAT NONTAGLIS 00     "+
       //     "3D0F8E779B3F48C986E9DF2BA59F48182ALF210Z9C00B6FFABEC00000000039480000000000000394800000000000000360";
-      print("Contoh Response: $serverResponse");
+      // print("Contoh Response: $serverResponse");
       return await parseISOResponse(serverResponse, idpel);
     } catch (e) {
       // print("Failed to process response.");
@@ -184,7 +184,9 @@ class ISOMessageParsing {
       transaksi,
       nama,
       totalTagihan,
-      formattedAdmin
+      admin,
+      idPelanggan,
+      SCREF
     ];
   }
 
@@ -200,17 +202,20 @@ class ISOMessageParsing {
         String nama = result[2];
         int totalTagihan = result[3];
         String formattedTotalTagihan = NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0).format(totalTagihan);
-        String formattedAdmin = result[4];
-        int totalBayar = totalTagihan + 3500;
+        int admin = result[4];
+        String formattedAdmin = NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0).format(admin);
+        String idPelanggan = result[5];
+        int totalBayar = totalTagihan + admin;
         String formattedTotBay = NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0).format(totalBayar);
+        String SCREF = result[6];
 
         // Store result in shared preferences for session
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('noRegistrasi', noRegistrasi);
+        await prefs.setString('idPelanggan', idPelanggan);
+        await prefs.setString('SCREF', SCREF);
         await prefs.setInt('totalTagihan', totalTagihan);
-        await prefs.setString('transaksi', transaksi);
-        await prefs.setString('nama', nama);
-        await prefs.setString('formattedAdmin', formattedAdmin);
+        await prefs.setInt('totalBayar', totalBayar);
+        await prefs.setInt('admin', admin);
 
         return "NOMOR REGISTRASI: $noRegistrasi\n"
                 "JENIS TRANSAKSI: $transaksi\n"
