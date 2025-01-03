@@ -105,9 +105,12 @@ class ISOMessageParsing {
       }
     }
 
+    int latestCurrentIndex = currentIndex;
+
     // Proses Bit 39
     if (bit39 != null) {
-      return await processResponseCode(bit39, idpel, bit48);
+      return await processResponseCode(
+          bit39, idpel, bit48, latestCurrentIndex, isoMessage);
     } else {
       return "Bit 39 tidak ditemukan.";
     }
@@ -191,7 +194,7 @@ class ISOMessageParsing {
   }
 
   static Future<String> processResponseCode(
-      String bit39, String idpel, String? bit48) async {
+      String bit39, String idpel, String? bit48, int latestCurrentIndex, String isoMessage) async {
     if (bit39 == '00') {
       // Jika bit39 == '00', langsung kembalikan hasil dari parseBit48
       if (bit48 != null) {
@@ -231,29 +234,37 @@ class ISOMessageParsing {
         return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
       }
     } else {
-      // Kode yang ada sebelumnya
-      switch (bit39) {
-        case '14':
-        case '77':
-          return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
-        case '82':
-          return 'Terjadi Kesalahan: TAGIHAN BULAN BERJALAN BELUM TERSEDIA';
-        case '89':
-          return 'Terjadi Kesalahan: PAYMENT MELEBIHI BATAS WAKTU YANG DITENTUKAN';
-        case '90':
-          return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
-        case '63':
-        case '16':
-          return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
-        case '34':
-          return 'Terjadi Kesalahan: TAGIHAN SUDAH TERBAYAR';
-        case '18':
-          return 'Terjadi Kesalahan: TIMEOUT';
-        case '48':
-          return 'Terjadi Kesalahan: NOMOR REGISTRASI KADALUARSA, MOHON HUBUNGI PLN';
-        default:
-          return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
-      }
+      int lengthBit62 = int.parse(
+          isoMessage.substring(latestCurrentIndex, latestCurrentIndex + 3));
+      latestCurrentIndex += 3; // Pindah ke data setelah length
+      String value = isoMessage.substring(
+          latestCurrentIndex, latestCurrentIndex + lengthBit62);
+      latestCurrentIndex += lengthBit62;
+      String bit62 = value; // Varible Message bit62
+      return "Terjadi Kesalahan: $bit62";
+
+      // switch (bit39) {
+      //   case '14':
+      //   case '77':
+      //     return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+      //   case '82':
+      //     return 'Terjadi Kesalahan: TAGIHAN BULAN BERJALAN BELUM TERSEDIA';
+      //   case '89':
+      //     return 'Terjadi Kesalahan: PAYMENT MELEBIHI BATAS WAKTU YANG DITENTUKAN';
+      //   case '90':
+      //     return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
+      //   case '63':
+      //   case '16':
+      //     return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
+      //   case '34':
+      //     return 'Terjadi Kesalahan: TAGIHAN SUDAH TERBAYAR';
+      //   case '18':
+      //     return 'Terjadi Kesalahan: TIMEOUT';
+      //   case '48':
+      //     return 'Terjadi Kesalahan: NOMOR REGISTRASI KADALUARSA, MOHON HUBUNGI PLN';
+      //   default:
+      //     return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
+      // }
     }
   }
 

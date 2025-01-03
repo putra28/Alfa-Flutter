@@ -120,8 +120,10 @@ class ISOMessageParsing {
       }
     }
 
+    int latestCurrentIndex = currentIndex;
+
     if (bit39 != null) {
-      return await processResponseCode(bit39, idpel, bit48, bit62);
+      return await processResponseCode(bit39, idpel, bit48, bit62, latestCurrentIndex, isoMessage);
     } else {
       return "Bit 39 tidak ditemukan.";
     }
@@ -161,7 +163,7 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
   }
 }
   static Future<String> processResponseCode(
-      String bit39, String idpel, String? bit48, String? bit62) async {
+      String bit39, String idpel, String? bit48, String? bit62, int latestCurrentIndex, String isoMessage) async {
     if (bit39 == '00') {
       if (bit48 != null) {
         List<dynamic> result = parseBit48(bit48, idpel);
@@ -209,30 +211,37 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
         return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
       }
     } else {
-      switch (bit39) {
-        case '09':
-          return 'Terjadi Kesalahan: NO. METER / IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
-        case '14':
-          return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
-        case '63':
-        case '16':
-          return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
-        case '18':
-          return 'Terjadi Kesalahan: TIMEOUT';
-        case '47':
-          return 'Terjadi Kesalahan: TOTAL KWH MELEBIHI BATAS MAKSIMUM';
-        case '77':
-          return 'Terjadi Kesalahan: NO. METER YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
-        case '78':
-          return 'Terjadi Kesalahan: NO. METER / IDPEL TIDAK DIIZINKAN UNTUK MELAKUKAN PEMBELIAN, HUBUNGI PLN TERDEKAT';
-        case '82':
-          return 'Terjadi Kesalahan: TAGIHAN BELUM TERSEDIA';
-        case '90':
-          return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
-        // Handle other error codes here...
-        default:
-          return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
-      }
+      int lengthBit62 = int.parse(
+          isoMessage.substring(latestCurrentIndex, latestCurrentIndex + 3));
+      latestCurrentIndex += 3; // Pindah ke data setelah length
+      String value = isoMessage.substring(
+          latestCurrentIndex, latestCurrentIndex + lengthBit62);
+      latestCurrentIndex += lengthBit62;
+      String bit62 = value; // Varible Message bit62
+      return "Terjadi Kesalahan: $bit62";
+      // switch (bit39) {
+      //   case '09':
+      //     return 'Terjadi Kesalahan: NO. METER / IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+      //   case '14':
+      //     return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+      //   case '63':
+      //   case '16':
+      //     return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
+      //   case '18':
+      //     return 'Terjadi Kesalahan: TIMEOUT';
+      //   case '47':
+      //     return 'Terjadi Kesalahan: TOTAL KWH MELEBIHI BATAS MAKSIMUM';
+      //   case '77':
+      //     return 'Terjadi Kesalahan: NO. METER YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
+      //   case '78':
+      //     return 'Terjadi Kesalahan: NO. METER / IDPEL TIDAK DIIZINKAN UNTUK MELAKUKAN PEMBELIAN, HUBUNGI PLN TERDEKAT';
+      //   case '82':
+      //     return 'Terjadi Kesalahan: TAGIHAN BELUM TERSEDIA';
+      //   case '90':
+      //     return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
+      //   default:
+      //     return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
+      // }
     }
   }
 
