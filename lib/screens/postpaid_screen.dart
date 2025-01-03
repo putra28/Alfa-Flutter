@@ -82,8 +82,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
             QuickAlert.show(
               context: context,
               type: QuickAlertType.error,
-              title: 'Terjadi Kesalahan',
-              text: serverResponseClean,
+              title: serverResponseClean,
               confirmBtnText: 'OK',
               confirmBtnColor: Theme.of(context).colorScheme.primary,
             );
