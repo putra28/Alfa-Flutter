@@ -18,11 +18,8 @@ class ISOMessageParsing {
     'DES'
   ];
 
-  static List<dynamic>?
-      result; // Variabel statis untuk menyimpan hasil parse Bit 48
+  static List<dynamic>?result;
 
-  // PROSES DEFINISIKAN ISO RESPONSE
-  // PANJANG LOOPING SESUAI DENGAN PANJANG KARAKTER BIT48, TOTAL JUMLAH TAGIHAN
   Future<String> printResponse(String serverResponse, String idpel) async {
     try {
       // IDPEL 173818157323
@@ -32,17 +29,12 @@ class ISOMessageParsing {
       //         "2024110000000000000000000000100100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
       //         "2024100000000000000000000000200100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" + //Looping Tagihan
       //         "360";
-      // print("Contoh Response: $serverResponse");
       return await parseISOResponse(serverResponse, idpel);
     } catch (e) {
-      // print("Failed to process response.");
-      // print(e);
-      // return e.toString();
       return "Terjadi Kesalahan, Silahkan Coba Lagi";
     }
   }
 
-  // PROSES DEFINISIKAN SETIAP BIT
   static Future<String> parseISOResponse(
       String isoMessage, String idpel) async {
     String header = isoMessage.substring(0, 2);
@@ -68,40 +60,31 @@ class ISOMessageParsing {
       49: 3
     };
 
-    // Data Elements
-    int currentIndex = 22; // Setelah Primary Bitmap
-    String? bit39; // Deklarasi untuk menyimpan Bit 39
-    String? bit48; // Deklarasi untuk menyimpan Bit 48
+    int currentIndex = 22; 
+    String? bit39; 
+    String? bit48; 
 
     for (int bit = 1; bit <= primaryBitmapBinary.length; bit++) {
       if (primaryBitmapBinary[bit - 1] == '1') {
         if (bit == 2 || bit == 32) {
-          // Bits dengan panjang variabel
-          int length =
-              int.parse(isoMessage.substring(currentIndex, currentIndex + 2));
+          int length = int.parse(isoMessage.substring(currentIndex, currentIndex + 2));
           currentIndex += 2; // Pindah ke data setelah length
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
+          String value = isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
         } else if (bit == 39) {
           int length = bitLengths[bit]!;
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
+          String value = isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
           bit39 = value; // Simpan nilai Bit 39 ke variabel
         } else if (bit == 48) {
-          int length =
-              int.parse(isoMessage.substring(currentIndex, currentIndex + 3));
+          int length = int.parse(isoMessage.substring(currentIndex, currentIndex + 3));
           currentIndex += 3; // Pindah ke data setelah length
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
+          String value = isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
           bit48 = value; // Simpan nilai Bit 48 ke variabel
         } else if (bitLengths.containsKey(bit)) {
-          // Bits dengan panjang tetap
           int length = bitLengths[bit]!;
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
+          String value = isoMessage.substring(currentIndex, currentIndex + length);
           currentIndex += length;
         }
       }
@@ -109,10 +92,8 @@ class ISOMessageParsing {
 
     int latestCurrentIndex = currentIndex;
 
-    // Proses Bit 39
     if (bit39 != null) {
-      return await processResponseCode(
-          bit39, idpel, bit48, latestCurrentIndex, isoMessage);
+      return await processResponseCode(bit39, idpel, bit48, latestCurrentIndex, isoMessage);
     } else {
       return "Bit 39 tidak ditemukan.";
     }
@@ -120,7 +101,6 @@ class ISOMessageParsing {
 
   // PROSES PARSING BIT48 DAN RETURN VALUE
   static List<dynamic> parseBit48(String bit48, String idpel) {
-    // print("Parsing Bit 48:");
     int currentIndex = 0;
 
     // 1. ID Pelanggan (13 karakter)
@@ -141,22 +121,16 @@ class ISOMessageParsing {
     // 4. Nama (20 karakter)
     String nama = bit48.substring(currentIndex, currentIndex + 25).trim();
     currentIndex += 25;
-    // 5. Kode Unit (5 karakter)
-    currentIndex += 5;
-    // 6. Telepon Unit (16 karakter, jika kosong tetap dihitung)
-    currentIndex += 15;
-    // 7. Tarif (2 karakter)
-    currentIndex += 4;
-    // 8. Daya (9 karakter)
-    currentIndex += 9;
+    currentIndex += 5; // 5. Kode Unit (5 karakter)
+    currentIndex += 15; // 6. Telepon Unit (16 karakter, jika kosong tetap dihitung)
+    currentIndex += 4; // 7. Tarif (2 karakter)
+    currentIndex += 9; // 8. Daya (9 karakter)
     // 9. Admin (9 karakter)
-    // String admin = bit48.substring(currentIndex, currentIndex + 9);
     int admin = 2500;
     currentIndex += 9;
     // String cleanedAdmin = admin.replaceFirst(RegExp(r'^0+'), '');
     // String adminVal = cleanedAdmin.isNotEmpty ? cleanedAdmin : '0';
 
-    // 9. Data Looping (115 karakter)
     List<String> dataLooping = [];
     for (int i = 0; i < totalDataLooping; i++) {
       String loopingData = bit48.substring(currentIndex, currentIndex + 115);
@@ -164,7 +138,6 @@ class ISOMessageParsing {
       currentIndex += 115;
     }
 
-    // Parsing setiap data looping
     int totalTagihanLooping = 0; // Variabel untuk menjumlahkan semua tagihanlooping
     int totalDendaLooping = 0; // Variabel untuk menjumlahkan semua dendalooping
     for (String data in dataLooping) {
@@ -178,39 +151,18 @@ class ISOMessageParsing {
     List<String> tahunList = dataLooping.map((e) => e.substring(0, 4)).toList();
     List<String> bulanList = dataLooping.map((e) => e.substring(4, 6)).toList();
     List<String> bulanNamaList = bulanList.map((e) => bulanArray[int.parse(e)]).toList();
-    List<String> periodeLoopingList = List.generate(dataLooping.length,
-        (index) => "${bulanNamaList[index]}${tahunList[index]}");
+    List<String> periodeLoopingList = List.generate(dataLooping.length,(index) => "${bulanNamaList[index]}${tahunList[index]}");
     // Menggabungkan elemen-elemen periodeLoopingList menjadi satu string dan menghapus karakter [ dan ]
-    String periodeLooping =
-        periodeLoopingList.toString().replaceAll(RegExp(r'[\[\]]'), '');
+    String periodeLooping = periodeLoopingList.toString().replaceAll(RegExp(r'[\[\]]'), '');
     int totalPeriodeLooping = periodeLoopingList.length;
-
     int totalAdmin = admin * totalPeriodeLooping;
-
-    String formattedAdmin =
-        NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
-            .format(totalAdmin);
-
     int RPTagPLN = totalTagihanLooping + totalDendaLooping;
-    String formattedRPTAG =
-        NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
-            .format(RPTagPLN);
-
     int totalBayar = RPTagPLN + totalAdmin;
-    String formattedTotBay =
-        NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
-            .format(totalBayar);
 
-    // parsedResult = "IDPEL : $idpel\n"
-    //     "NAMA : $nama\n"
-    //     "TOTAL LEMBAR TAGIHAN : $totalTagihan\n"
-    //     "BL/TH : $periodeLooping\n"
-    //     "RP TAG PLN : $formattedRPTAG\n"
-    //     "ADMIN BANK : $formattedAdmin\n"
-    //     "TOTAL : $formattedTotBay\n";
+    String formattedAdmin = NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0).format(totalAdmin);
+    String formattedRPTAG = NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0).format(RPTagPLN);
+    String formattedTotBay = NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0).format(totalBayar);
 
-    // return parsedResult
-    //     .trim(); // Menghilangkan spasi atau baris kosong di akhir
     return [
       nama, // Nama pelanggan
       totalTagihan, // Total tagihan
@@ -229,9 +181,7 @@ class ISOMessageParsing {
   static Future<String> processResponseCode(String bit39, String idpel,
       String? bit48, int latestCurrentIndex, String isoMessage) async {
     if (bit39 == '00') {
-      // Jika bit39 == '00', langsung kembalikan hasil dari parseBit48
       if (bit48 != null) {
-        // return parseBit48(bit48, idpel);
         List<dynamic> result = parseBit48(bit48, idpel);
         String nama = result[0];
         int totalTagihan = result[1];
@@ -255,18 +205,15 @@ class ISOMessageParsing {
         await prefs.setString('idPelanggan', idPelanggan);
         await prefs.setString('SCREF', SCREF);
 
-        return "IDPEL: $idPelanggan\n"
-                "NAMA: $nama\n"
+        return "IDPEL         : $idPelanggan\n"
+                "NAMA         : $nama\n"
                 "TOTAL TAGIHAN: $totalTagihan\n"
-                "BL/TH: $periodeLooping\n"
-                "RP TAG PLN: $formattedRPTAG\n"
-                "ADMIN BANK: $formattedAdmin\n"
-                "TOTAL BAYAR: $formattedTotBay"
+                "BL/TH        : $periodeLooping\n"
+                "RP TAG PLN   : $formattedRPTAG\n"
+                "ADMIN BANK   : $formattedAdmin\n"
+                "TOTAL BAYAR  : $formattedTotBay"
             .trim();
-        // return "gacor lek ku";
-        // return bit48;
       } else {
-        // return "Bit 39 == 00 tetapi Bit 48 tidak tersedia.";
         return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
       }
     } else {
