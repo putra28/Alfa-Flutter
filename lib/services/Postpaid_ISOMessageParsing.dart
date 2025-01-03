@@ -165,30 +165,19 @@ class ISOMessageParsing {
     }
 
     // Parsing setiap data looping
-    int totalTagihanLooping =
-        0; // Variabel untuk menjumlahkan semua tagihanlooping
+    int totalTagihanLooping = 0; // Variabel untuk menjumlahkan semua tagihanlooping
     int totalDendaLooping = 0; // Variabel untuk menjumlahkan semua dendalooping
     for (String data in dataLooping) {
-      String tagihanlooping = data
-          .substring(22, 34)
-          .replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
-      String dendalooping = data
-          .substring(55, 67)
-          .replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
-      if (dendalooping.isEmpty) {
-        dendalooping = '0';
-      }
-
-      totalTagihanLooping +=
-          int.parse(tagihanlooping); // Menjumlahkan tagihanlooping
-      totalDendaLooping +=
-          int.parse(dendalooping); // Menjumlahkan tagihanlooping
+      String tagihanlooping = data.substring(22, 34).replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
+      String dendalooping = data.substring(55, 67).replaceFirst(RegExp(r'^0+'), ''); // 12 karakter, tanpa awalan nol
+      dendalooping = dendalooping.isEmpty ? '0' : dendalooping;
+      totalTagihanLooping += int.parse(tagihanlooping);
+      totalDendaLooping += int.parse(dendalooping);
     }
 
     List<String> tahunList = dataLooping.map((e) => e.substring(0, 4)).toList();
     List<String> bulanList = dataLooping.map((e) => e.substring(4, 6)).toList();
-    List<String> bulanNamaList =
-        bulanList.map((e) => bulanArray[int.parse(e)]).toList();
+    List<String> bulanNamaList = bulanList.map((e) => bulanArray[int.parse(e)]).toList();
     List<String> periodeLoopingList = List.generate(dataLooping.length,
         (index) => "${bulanNamaList[index]}${tahunList[index]}");
     // Menggabungkan elemen-elemen periodeLoopingList menjadi satu string dan menghapus karakter [ dan ]
@@ -202,7 +191,6 @@ class ISOMessageParsing {
         NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
             .format(totalAdmin);
 
-    // Hitung total dari semua tagihan dan denda looping
     int RPTagPLN = totalTagihanLooping + totalDendaLooping;
     String formattedRPTAG =
         NumberFormat.currency(locale: 'id', symbol: 'Rp.', decimalDigits: 0)
@@ -282,13 +270,10 @@ class ISOMessageParsing {
         return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
       }
     } else {
-      int lengthBit62 = int.parse(
-          isoMessage.substring(latestCurrentIndex, latestCurrentIndex + 3));
-      latestCurrentIndex += 3; // Pindah ke data setelah length
-      String value = isoMessage.substring(
-          latestCurrentIndex, latestCurrentIndex + lengthBit62);
+      int lengthBit62 = int.parse(isoMessage.substring(latestCurrentIndex, latestCurrentIndex + 3));
+      latestCurrentIndex += 3; 
+      String bit62 = isoMessage.substring(latestCurrentIndex, latestCurrentIndex + lengthBit62);
       latestCurrentIndex += lengthBit62;
-      String bit62 = value; // Varible Message bit62
       return "Terjadi Kesalahan: $bit62";
     }
   }
