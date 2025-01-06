@@ -134,7 +134,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                   "Layanan Informasi Tagihan PLN",
                   style: GoogleFonts.dongle(
                     textStyle: TextStyle(
-                      fontSize: width * 0.05,
+                      fontSize: width * 0.04,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -149,7 +149,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
             children: [
               SizedBox(height: height * 0.02),
               Container(
-                margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                margin: EdgeInsets.symmetric(horizontal: width * 0.04),
                 child: Image.asset(
                   'assets/images/widthBanner.png',
                   width: double.infinity,
@@ -171,7 +171,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                   Expanded(
                     flex: 7,
                     child: Container(
-                      margin: EdgeInsets.only(left: width * 0.05),
+                      margin: EdgeInsets.only(left: width * 0.04),
                       child: TextField(
                         controller: _controller,
                         decoration: InputDecoration(
@@ -179,7 +179,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                           labelText: 'ID Pelanggan',
                           labelStyle: GoogleFonts.dongle(
                             textStyle: TextStyle(
-                              fontSize: width * 0.05,
+                              fontSize: width * 0.04,
                             ),
                           ),
                         ),
@@ -190,7 +190,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                   Expanded(
                     flex: 3,
                     child: Container(
-                      margin: EdgeInsets.only(right: width * 0.05),
+                      margin: EdgeInsets.only(right: width * 0.04),
                       height: height * 0.07,
                       child: ElevatedButton(
                         onPressed: () {
@@ -213,7 +213,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                       'Silahkan Masukkan ID Pelanggan Dengan Benar',
                       style: GoogleFonts.dongle(
                         textStyle: TextStyle(
-                          fontSize: width * 0.05,
+                          fontSize: width * 0.04,
                           color: Colors.black,
                         ),
                       ),
@@ -223,7 +223,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
               if (!_outputISOMessageParsing.isEmpty)
                 Container(
                   alignment: Alignment.centerLeft,
-                  margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                  margin: EdgeInsets.symmetric(horizontal: width * 0.04),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -234,7 +234,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               text: 'PLN Postpaid \n',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.05,
+                                  fontSize: width * 0.04,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -244,7 +244,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               text: '$_outputISOMessageParsing',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.05,
+                                  fontSize: width * 0.04,
                                   color: Colors.black,
                                 ),
                               ),
@@ -261,7 +261,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                   children: [
                     Expanded(
                       child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                        margin: EdgeInsets.symmetric(horizontal: width * 0.04),
                         height: height * 0.07,
                         child: ElevatedButton(
                           onPressed: () {
@@ -273,7 +273,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                           child: Text('Clear Data',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.05,
+                                fontSize: width * 0.04,
                                 color: const Color.fromARGB(255, 255, 255, 255),
                               ),
                             ),
@@ -283,7 +283,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                     ),
                     Expanded(
                       child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                        margin: EdgeInsets.symmetric(horizontal: width * 0.04),
                         height: height * 0.07,
                         child: ElevatedButton(
                           onPressed: () async {
@@ -343,7 +343,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                             textAlign: TextAlign.center,
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.05,
+                                fontSize: width * 0.04,
                                 color: const Color.fromARGB(255, 255, 255, 255),
                               ),
                             ),

@@ -44,7 +44,7 @@ class ISOMessageParsing {
 
     Map<int, int> bitLengths = {
       3: 6,
-      4: 24,
+      4: 12,
       7: 10,
       11: 6,
       12: 6,

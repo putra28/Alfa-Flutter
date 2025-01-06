@@ -20,7 +20,7 @@ class InquiryServices {
           String responseChunk = String.fromCharCodes(data);
           responseBuffer.write(responseChunk);
           print(
-              'Received chunk: $responseChunk\n'); // Cetak data yang diterima (chunk)
+              'Server Response: $responseChunk\n'); // Cetak data yang diterima (chunk)
         },
         onDone: () {
           print(
@@ -40,7 +40,7 @@ class InquiryServices {
       return responseBuffer.toString();
     } catch (e) {
       String errorMessage = e.toString().replaceFirst("Exception: ", "");
-      print('Terjadi kesalahan: $errorMessage');
+      print('Terjadi kesalahan: $errorMessage\n');
       return 'Terjadi Kesalahan: $errorMessage';
     }
   }

@@ -107,7 +107,7 @@ class _LoginState extends State<Login> {
                         labelText: 'ID Toko',
                         labelStyle: GoogleFonts.dongle(
                           textStyle: TextStyle(
-                            fontSize: width * 0.05,
+                            fontSize: (width * 0.04),
                           ),
                         )
                       ),
