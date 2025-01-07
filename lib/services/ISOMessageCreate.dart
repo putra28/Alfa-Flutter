@@ -1,15 +1,16 @@
-import 'Postpaid_bitmap.dart';
+import 'ISObitmap.dart';
 import 'dart:io';
 
 class Isomessagecreate {
   // Fungsi untuk membangun ISO message
-  String createIsoMessage(String inputValue) {
+  String createIsoMessage(String inputValue, String productCode) {
     // Menggunakan bitmap dari PostpaidBitmap
     String isoBitmap = PostpaidBitmap.buildIsoBitmap();
 
     // Elemen-elemen ISO message
     String mti = "0200";
-    String bit2 = "14501"; //ubah 53502 prepaid //53504 nontaglis
+    String bit2 = productCode;
+    // String bit2 = "14501"; //ubah 53502 prepaid //53504 nontaglis
     String bit3 = "380000";
     String bit7 = _currentTimestamp("MMddHHmmss");
     String bit11 = "007434";

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/Postpaid_ISOMessageCreate.dart';
+import '../services/ISOMessageCreate.dart';
 import '../services/Postpaid_ISOMessageParsing.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,7 +47,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
       final processor = Isomessagecreate();
       final processorInquiry = InquiryServices();
       final processorParsing = ISOMessageParsing();
-      final isoMessage = processor.createIsoMessage(_controller.text);
+      String productCode = "14501";
+      final isoMessage = processor.createIsoMessage(_controller.text, productCode);
       final isoMessagetoSent = 'XX' + isoMessage;
 
       // final parsingISO = await processorParsing.printResponse(_controller.text);
@@ -74,8 +75,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
         String serverResponse =
             await processorInquiry.sendISOMessage(isoMessagetoSent);
         if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-          final parsingISO =
-              await processorParsing.printResponse(serverResponse, _controller.text);
+          final parsingISO = await processorParsing.printResponse(
+              serverResponse, _controller.text);
           if (parsingISO.startsWith("Terjadi Kesalahan")) {
             String serverResponseClean =
                 parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
@@ -183,7 +184,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                             ),
                           ),
                         ),
-                      keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.number,
                       ),
                     ),
                   ),
@@ -270,7 +271,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               _outputISOMessageParsing = "";
                             });
                           },
-                          child: Text('Clear Data',
+                          child: Text(
+                            'Clear Data',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
                                 fontSize: width * 0.04,
@@ -323,7 +325,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
                                 context: context,
                                 type: QuickAlertType.success,
                                 title: 'Berhasil Melakukan Booking No. Antrian',
-                                text: "No. Antrian : ${prefs.getString('noantrian')}",
+                                text:
+                                    "No. Antrian : ${prefs.getString('noantrian')}",
                                 confirmBtnText: 'OK',
                                 confirmBtnColor: Colors.green,
                               );
@@ -339,7 +342,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               );
                             }
                           },
-                          child: Text('Booking No. Antrian',
+                          child: Text(
+                            'Booking No. Antrian',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(

@@ -1,5 +1,5 @@
 // lib/services/postpaid_bitmap.dart
-import 'Postpaid_bitmap_types.dart';
+import 'ISObitmap_types.dart';
 
 class PostpaidBitmap {
   // Fungsi untuk membangun bitmap

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/Prepaid_ISOMessageCreate.dart'; // Import file processor.dart
+import '../services/ISOMessageCreate.dart'; // Import file processor.dart
 import '../services/Prepaid_ISOMessageParsing.dart'; // Import file untuk ISOMessageParsing
 import '../widgets/CustomRadioWidget.dart';
 import 'package:quickalert/quickalert.dart';
@@ -71,7 +71,8 @@ class _PrepaidScreenState extends State<prepaid_screen> {
       final processor = Isomessagecreate();
       final processorInquiry = InquiryServices();
       final processorParsing = ISOMessageParsing();
-      final isoMessage = processor.createIsoMessage(_controller.text);
+      String productCode = "53502";
+      final isoMessage = processor.createIsoMessage(_controller.text, productCode);
       final isoMessagetoSent = 'XX' + isoMessage;
 
       // final parsingISO = await processorParsing.printResponse(_controller.text);
@@ -178,7 +179,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                 "Layanan Informasi Tagihan PLN",
                 style: GoogleFonts.dongle(
                   textStyle: TextStyle(
-                    fontSize: width * 0.05,
+                    fontSize: width * 0.04,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -193,7 +194,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
           children: [
             SizedBox(height: height * 0.02),
             Container(
-              margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+              margin: EdgeInsets.symmetric(horizontal: width * 0.04),
               child: Image.asset(
                 'assets/images/widthBanner.png',
                 width: double.infinity,
@@ -215,7 +216,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                 Expanded(
                   flex: 7,
                   child: Container(
-                    margin: EdgeInsets.only(left: width * 0.05),
+                    margin: EdgeInsets.only(left: width * 0.04),
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
@@ -223,7 +224,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                         labelText: 'No. Meter / ID Pelanggan',
                         labelStyle: GoogleFonts.dongle(
                           textStyle: TextStyle(
-                            fontSize: width * 0.05,
+                            fontSize: width * 0.04,
                           ),
                         ),
                       ),
@@ -234,7 +235,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                 Expanded(
                   flex: 3,
                   child: Container(
-                    margin: EdgeInsets.only(right: width * 0.05),
+                    margin: EdgeInsets.only(right: width * 0.04),
                     height: height * 0.07,
                     child: ElevatedButton(
                       onPressed: () {
@@ -245,7 +246,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                         'Cek',
                         style: GoogleFonts.dongle(
                           textStyle: TextStyle(
-                            fontSize: width * 0.05,
+                            fontSize: width * 0.04,
                             color: const Color.fromARGB(255, 255, 255, 255),
                           ),
                         ),
@@ -265,7 +266,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                     'Silahkan Masukkan No. Meter / ID Pelanggan Dengan Benar',
                     style: GoogleFonts.dongle(
                       textStyle: TextStyle(
-                        fontSize: width * 0.05,
+                        fontSize: width * 0.04,
                         color: Colors.black,
                       ),
                     ),
@@ -274,7 +275,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
               ),
             if (!_outputISOMessageParsing.isEmpty)
               Container(
-                margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                margin: EdgeInsets.symmetric(horizontal: width * 0.04),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -285,7 +286,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             text: 'PLN Prepaid \n',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.05,
+                                fontSize: width * 0.04,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
@@ -295,7 +296,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             text: '$_outputISOMessageParsing\n',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.05,
+                                fontSize: width * 0.04,
                                 color: Colors.black,
                               ),
                             ),
@@ -305,7 +306,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                               text: 'PILIH DENOM : $_denomValue',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.05,
+                                  fontSize: width * 0.04,
                                   color: Colors.black,
                                 ),
                               ),
@@ -327,7 +328,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                                   'ADMIN BANK : $_formattedAdmin\nTOTAL BAYAR : $_totBayarValue',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.05,
+                                  fontSize: width * 0.04,
                                   color: Colors.black,
                                 ),
                               ),
@@ -344,7 +345,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                 children: [
                   Expanded(
                     child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                      margin: EdgeInsets.symmetric(horizontal: width * 0.04),
                       height: height * 0.07,
                       child: ElevatedButton(
                         onPressed: () {
@@ -361,7 +362,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                           'Clear Data',
                           style: GoogleFonts.dongle(
                             textStyle: TextStyle(
-                              fontSize: width * 0.05,
+                              fontSize: width * 0.04,
                               color: const Color.fromARGB(255, 255, 255, 255),
                             ),
                           ),
@@ -371,7 +372,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                   ),
                   Expanded(
                     child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                      margin: EdgeInsets.symmetric(horizontal: width * 0.04),
                       height: height * 0.07,
                       child: ElevatedButton(
                         onPressed: () async {
@@ -447,7 +448,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                           textAlign: TextAlign.center,
                           style: GoogleFonts.dongle(
                             textStyle: TextStyle(
-                              fontSize: width * 0.05,
+                              fontSize: width * 0.04,
                               color: const Color.fromARGB(255, 255, 255, 255),
                             ),
                           ),
