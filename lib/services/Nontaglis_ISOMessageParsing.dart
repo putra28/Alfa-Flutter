@@ -117,7 +117,7 @@ class ISOMessageParsing {
   }
 
   // PROSES PARSING BIT48 DAN RETURN VALUE
-  static List<dynamic> parseBit48(String bit48, String idpel) {
+  static List<dynamic> NontaglisParseBit48(String bit48, String idpel) {
     // print("Parsing Bit 48:");
     int currentIndex = 0;
 
@@ -196,10 +196,8 @@ class ISOMessageParsing {
   static Future<String> processResponseCode(
       String bit39, String idpel, String? bit48, int latestCurrentIndex, String isoMessage) async {
     if (bit39 == '00') {
-      // Jika bit39 == '00', langsung kembalikan hasil dari parseBit48
       if (bit48 != null) {
-        // return parseBit48(bit48, idpel);
-        List<dynamic> result = parseBit48(bit48, idpel);
+        List<dynamic> result = NontaglisParseBit48(bit48, idpel);
         String noRegistrasi = result[0];
         String transaksi = result[1];
         String nama = result[2];

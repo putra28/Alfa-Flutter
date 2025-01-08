@@ -166,7 +166,7 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
       String bit39, String idpel, String? bit48, String? bit62, int latestCurrentIndex, String isoMessage) async {
     if (bit39 == '00') {
       if (bit48 != null) {
-        List<dynamic> result = parseBit48(bit48, idpel);
+        List<dynamic> result = PrepaidParseBit48(bit48, idpel);
         if (bit62 != null) {
           List<dynamic> result62 = parseBit62(bit62);
           List<int> dataPerulanganVal = result62[4];
@@ -245,7 +245,7 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
     }
   }
 
-  static List<dynamic> parseBit48(String bit48, String idpel) {
+  static List<dynamic> PrepaidParseBit48(String bit48, String idpel) {
     int currentIndex = 0;
     currentIndex += 7;
     String nometer = bit48.substring(currentIndex, currentIndex + 11);

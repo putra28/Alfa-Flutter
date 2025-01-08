@@ -8,6 +8,7 @@ import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/BookingAntrian.dart';
 import '../services/InquiryServices.dart';
+// import '../services/ISOMessageParser.dart';
 
 class postpaid_screen extends StatefulWidget {
   const postpaid_screen({super.key});
@@ -47,67 +48,68 @@ class _postpaid_screenState extends State<postpaid_screen> {
       final processor = Isomessagecreate();
       final processorInquiry = InquiryServices();
       final processorParsing = ISOMessageParsing();
+      // final processorParsing = ISOMessageParser();
       String productCode = "14501";
-      final isoMessage = processor.createIsoMessage(_controller.text, productCode);
+      final isoMessage =
+          processor.createIsoMessage(_controller.text, productCode);
       final isoMessagetoSent = 'XX' + isoMessage;
 
-      // final parsingISO = await processorParsing.printResponse(_controller.text);
-      // if (parsingISO.startsWith("Terjadi Kesalahan")) {
-      //   String serverResponseClean =
-      //       parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-      //   QuickAlert.show(
-      //     context: context,
-      //     type: QuickAlertType.error,
-      //     title: 'Terjadi Kesalahan',
-      //     text: serverResponseClean,
-      //     confirmBtnText: 'OK',
-      //     confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //   );
-      //   _controller.clear();
-      // } else {
-      //   setState(() {
-      //     _outputISOMessage = isoMessage;
-      //     _outputISOMessageParsing = parsingISO.trim();
-      //   });
-      // }
-
-      try {
-        String serverResponse =
-            await processorInquiry.sendISOMessage(isoMessagetoSent);
-        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-          final parsingISO = await processorParsing.printResponse(
-              serverResponse, _controller.text);
-          if (parsingISO.startsWith("Terjadi Kesalahan")) {
-            String serverResponseClean =
-                parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-            QuickAlert.show(
-              context: context,
-              type: QuickAlertType.error,
-              title: serverResponseClean,
-              confirmBtnText: 'OK',
-              confirmBtnColor: Theme.of(context).colorScheme.primary,
-            );
-            _controller.clear();
-          } else {
-            setState(() {
-              _outputISOMessageParsing = parsingISO;
-            });
-          }
-        } else {
-          String serverResponseClean =
-              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
-          QuickAlert.show(
-            context: context,
-            type: QuickAlertType.error,
-            title: serverResponseClean,
-            confirmBtnText: 'OK',
-            confirmBtnColor: Theme.of(context).colorScheme.primary,
-          );
-          _controller.clear();
-        }
-      } catch (e) {
-        print('Error: $e');
+      final parsingISO = await processorParsing.printResponse(_controller.text);
+      if (parsingISO.startsWith("Terjadi Kesalahan")) {
+        String serverResponseClean =
+            parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: serverResponseClean,
+          confirmBtnText: 'OK',
+          confirmBtnColor: Theme.of(context).colorScheme.primary,
+        );
+        _controller.clear();
+      } else {
+        setState(() {
+          _outputISOMessage = isoMessage;
+          _outputISOMessageParsing = parsingISO.trim();
+        });
       }
+
+      // try {
+      //   String serverResponse =
+      //       await processorInquiry.sendISOMessage(isoMessagetoSent);
+      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+      //     final parsingISO = await processorParsing.printResponse(
+      //         serverResponse, _controller.text);
+      //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
+      //       String serverResponseClean =
+      //           parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+      //       QuickAlert.show(
+      //         context: context,
+      //         type: QuickAlertType.error,
+      //         title: serverResponseClean,
+      //         confirmBtnText: 'OK',
+      //         confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //       );
+      //       _controller.clear();
+      //     } else {
+      //       setState(() {
+      //         _outputISOMessageParsing = parsingISO;
+      //       });
+      //     }
+      //   } else {
+      //     String serverResponseClean =
+      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+      //     QuickAlert.show(
+      //       context: context,
+      //       type: QuickAlertType.error,
+      //       title: serverResponseClean,
+      //       confirmBtnText: 'OK',
+      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //     );
+      //     _controller.clear();
+      //   }
+      // } catch (e) {
+      //   print('Error: $e');
+      // }
     }
   }
 
