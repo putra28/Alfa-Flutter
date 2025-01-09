@@ -297,6 +297,13 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
+            Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              child: Image.asset(
+                'assets/images/logobank.png',
+                width: width * 0.3, // 16:9 ratio
+              ),
+            ),
           ],
         ),
       ),

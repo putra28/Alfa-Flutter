@@ -31,51 +31,80 @@ class ISOMessageParsing {
               "2024100000000000000000000000200100D00000000000000000000000000000000000068150000693300000000000000000000000000000000" +
               "360";
           // "XX0210623A40010AC080040514501380000010213095400743413095401020103602116ALN32SATPZ01P3330000000000011454ALF001201000145100000360053IDPEL YANG ANDA MASUKKAN SALAH, MOHON TELITI KEMBALI."; // bit 62
-      // "XX0210623A40010AC080040514501380000010615511400743415511401060107602116ALN32SATPZ01P333000000000001345145100000360023TAGIHAN SUDAH TERBAYAR.";
+          // "XX0210623A40010AC080040514501380000010615511400743415511401060107602116ALN32SATPZ01P333000000000001345145100000360023TAGIHAN SUDAH TERBAYAR.";
+          // "XX0210623A40010AC080040514501380000000000000000010309513500743409513501030104602116ALN32SATPZ01P3330000000000010554ALF001201000145100000360024KONEKSI KE SERVER GAGAL.";
       return await parseISOResponse(serverResponse, idpel);
     } catch (e) {
       return "Terjadi Kesalahan, Silahkan Coba Lagi";
     }
   }
 
-  static Future<String> parseISOResponse(
-    String isoMessage, String idpel) async {
-    // Initialize bitmap parser
-    Isobitmapparsing.initialize(128);
+  static String? extractBit62Message(String isoMessage) {
+    try {
+      // Find position of "360" marker
+      int marker = isoMessage.indexOf("360");
+      if (marker == -1) return null;
 
-    // Parse the message using ISOMessageParser
-    ParsedMessage parsedMessage = ISOMessageParser.parseMessage(isoMessage);
+      // Extract length (3 characters after "360")
+      String lengthStr = isoMessage.substring(marker + 3, marker + 6);
+      int length = int.tryParse(lengthStr) ?? 0;
+      if (length == 0) return null;
 
-    // Print all parsed fields for debugging
-    print("=== Parsed ISO Message Fields ===");
-    print(ISOMessageParser.formatParsedMessage(parsedMessage));
-
-    // Find bit 39 (response code) and bit 48 (additional data)
-    String? bit39;
-    String? bit48;
-    String? bit62;
-
-    for (ParsedField field in parsedMessage.fields) {
-      if (field.bit == 39) {
-        bit39 = field.value;
-      } else if (field.bit == 48) {
-        bit48 = field.value;
-      } else if (field.bit == 62) {
-        bit62 = field.value;
-      }
+      // Extract message based on length
+      String message = isoMessage.substring(marker + 6, marker + 6 + length);
+      return message;
+    } catch (e) {
+      return null;
     }
+  }
 
-    if (bit39 != null) {
-      if (bit39 != "00" && bit62 != null) {
-        return "Terjadi Kesalahan: $bit62";
+  static Future<String> parseISOResponse(
+      String isoMessage, String idpel) async {
+    try {
+      // Initialize bitmap parser
+      Isobitmapparsing.initialize(128);
+
+      // Parse the message using ISOMessageParser
+      ParsedMessage parsedMessage = ISOMessageParser.parseMessage(isoMessage);
+
+      // Print all parsed fields for debugging
+      print("=== Parsed ISO Message Fields ===");
+      print(ISOMessageParser.formatParsedMessage(parsedMessage));
+
+      // Find bit 39 (response code) and bit 48 (additional data)
+      String? bit39;
+      String? bit48;
+      String? bit62;
+
+      for (ParsedField field in parsedMessage.fields) {
+        if (field.bit == 39) {
+          bit39 = field.value;
+        } else if (field.bit == 48) {
+          bit48 = field.value;
+        } else if (field.bit == 62) {
+          bit62 = field.value;
+        }
       }
-      return await processResponseCode(bit39, idpel, bit48, 0, isoMessage);
-    } else {
-      return "Bit 39 tidak ditemukan.";
+
+      if (bit39 != null) {
+        if (bit39 != "00" && bit62 != null) {
+          return "Terjadi Kesalahan: $bit62";
+        }
+        return await processResponseCode(bit39, idpel, bit48, 0, isoMessage);
+      } else {
+        return "Bit 39 tidak ditemukan.";
+      }
+    } catch (e) {
+      String? errorMessage = extractBit62Message(isoMessage);
+      if (errorMessage != null) {
+        return "Terjadi Kesalahan: $errorMessage";
+      }
+      return "Terjadi Kesalahan: Format ISO Message tidak valid";
     }
   }
 
   // Keep the existing parseBit48 method unchanged as it handles specific business logic
+
   static List<dynamic> parseBit48(String bit48, String idpel) {
     // Existing parseBit48 implementation remains the same
     int currentIndex = 0;
@@ -169,13 +198,13 @@ class ISOMessageParsing {
       await prefs.setString('SCREF', result[10]);
 
       return """
-IDPEL         : ${result[9]}
-NAMA          : ${result[0]}
-TOTAL TAGIHAN : ${result[1]}
-BL/TH         : ${result[2]}
-RP TAG PLN    : ${result[3]}
-ADMIN BANK    : ${result[4]}
-TOTAL BAYAR   : ${result[5]}
+IDPEL                 : ${result[9]}
+NAMA                : ${result[0]}
+TOTAL TAGIHAN  : ${result[1]}
+BL/TH                : ${result[2]}
+RP TAG PLN        : ${result[3]}
+ADMIN BANK      : ${result[4]}
+TOTAL BAYAR     : ${result[5]}
 """
           .trim();
     } else {

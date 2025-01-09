@@ -325,7 +325,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                           children: <TextSpan>[
                             TextSpan(
                               text:
-                                  'ADMIN BANK : $_formattedAdmin\nTOTAL BAYAR : $_totBayarValue',
+                                  'ADMIN BANK  : $_formattedAdmin\nTOTAL BAYAR : $_totBayarValue',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
                                   fontSize: width * 0.04,

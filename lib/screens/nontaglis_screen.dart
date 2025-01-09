@@ -48,65 +48,66 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
       final processorInquiry = InquiryServices();
       final processorParsing = ISOMessageParsing();
       String productCode = "53504";
-      final isoMessage = processor.createIsoMessage(_controller.text, productCode);
+      final isoMessage =
+          processor.createIsoMessage(_controller.text, productCode);
       final isoMessagetoSent = 'XX' + isoMessage;
 
-      // final parsingISO = await processorParsing.printResponse(_controller.text);
-      // if (parsingISO.startsWith("Terjadi Kesalahan")) {
-      //   String serverResponseClean =
-      //       parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-      //   QuickAlert.show(
-      //     context: context,
-      //     type: QuickAlertType.error,
-      //     title: 'Terjadi Kesalahan',
-      //     text: serverResponseClean,
-      //     confirmBtnText: 'OK',
-      //     confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //   );
-      //   _controller.clear();
-      // } else {
-      //   setState(() {
-      //     _outputISOMessage = isoMessage;
-      //     _outputISOMessageParsing = parsingISO.trim();
-      //   });
-      // }
-      try {
-        String serverResponse =
-            await processorInquiry.sendISOMessage(isoMessagetoSent);
-        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-          final parsingISO =
-              await processorParsing.printResponse(serverResponse, _controller.text);
-          if (parsingISO.startsWith("Terjadi Kesalahan")) {
-            String serverResponseClean =
-                parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-            QuickAlert.show(
-              context: context,
-              type: QuickAlertType.error,
-              title: serverResponseClean,
-              confirmBtnText: 'OK',
-              confirmBtnColor: Theme.of(context).colorScheme.primary,
-            );
-            _controller.clear();
-          } else {
-            setState(() {
-              _outputISOMessageParsing = parsingISO;
-            });
-          }
-        } else {
-          String serverResponseClean =
-              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
-          QuickAlert.show(
-            context: context,
-            type: QuickAlertType.error,
-            title: serverResponseClean,
-            confirmBtnText: 'OK',
-            confirmBtnColor: Theme.of(context).colorScheme.primary,
-          );
-          _controller.clear();
-        }
-      } catch (e) {
-        print('Error: $e');
+      final parsingISO = await processorParsing.printResponse(_controller.text);
+      if (parsingISO.startsWith("Terjadi Kesalahan")) {
+        String serverResponseClean =
+            parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Terjadi Kesalahan',
+          text: serverResponseClean,
+          confirmBtnText: 'OK',
+          confirmBtnColor: Theme.of(context).colorScheme.primary,
+        );
+        _controller.clear();
+      } else {
+        setState(() {
+          _outputISOMessage = isoMessage;
+          _outputISOMessageParsing = parsingISO.trim();
+        });
       }
+      // try {
+      //   String serverResponse =
+      //       await processorInquiry.sendISOMessage(isoMessagetoSent);
+      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+      //     final parsingISO =
+      //         await processorParsing.printResponse(serverResponse, _controller.text);
+      //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
+      //       String serverResponseClean =
+      //           parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+      //       QuickAlert.show(
+      //         context: context,
+      //         type: QuickAlertType.error,
+      //         title: serverResponseClean,
+      //         confirmBtnText: 'OK',
+      //         confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //       );
+      //       _controller.clear();
+      //     } else {
+      //       setState(() {
+      //         _outputISOMessageParsing = parsingISO;
+      //       });
+      //     }
+      //   } else {
+      //     String serverResponseClean =
+      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+      //     QuickAlert.show(
+      //       context: context,
+      //       type: QuickAlertType.error,
+      //       title: serverResponseClean,
+      //       confirmBtnText: 'OK',
+      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //     );
+      //     _controller.clear();
+      //   }
+      // } catch (e) {
+      //   print('Error: $e');
+      // }
     }
   }
 
@@ -183,7 +184,7 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                             ),
                           ),
                         ),
-                      keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.number,
                       ),
                     ),
                   ),
@@ -270,7 +271,8 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                               _outputISOMessageParsing = "";
                             });
                           },
-                          child: Text('Clear Data',
+                          child: Text(
+                            'Clear Data',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
                                 fontSize: width * 0.04,
@@ -306,7 +308,7 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                                 "var_idpel": idPelanggan,
                                 "var_rptag": totalTagihan,
                                 "var_admttl": admin,
-                                "var_sc": SCREF
+                                "var_scref": SCREF
                               };
 
                               await BookingAntrian.bookingAntrian(
@@ -336,7 +338,8 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                               );
                             }
                           },
-                          child: Text('Booking No. Antrian',
+                          child: Text(
+                            'Booking No. Antrian',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(

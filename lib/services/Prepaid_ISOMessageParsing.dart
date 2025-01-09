@@ -43,41 +43,67 @@ class ISOMessageParsing {
     }
   }
 
-  // PROSES DEFINISIKAN SETIAP BIT
+  static String? extractBit62Message(String isoMessage) {
+    try {
+      // Find position of "360" marker
+      int marker = isoMessage.indexOf("360");
+      if (marker == -1) return null;
+
+      // Extract length (3 characters after "360")
+      String lengthStr = isoMessage.substring(marker + 3, marker + 6);
+      int length = int.tryParse(lengthStr) ?? 0;
+      if (length == 0) return null;
+
+      // Extract message based on length
+      String message = isoMessage.substring(marker + 6, marker + 6 + length);
+      return message;
+    } catch (e) {
+      return null;
+    }
+  }
+
   static Future<String> parseISOResponse(
       String isoMessage, String idpel) async {
-    // Initialize bitmap parser
-    Isobitmapparsing.initialize(128);
-
-    // Parse the message using ISOMessageParser
-    ParsedMessage parsedMessage = ISOMessageParser.parseMessage(isoMessage);
-
-    // Print all parsed fields for debugging
-    print("=== Parsed ISO Message Fields ===");
-    print(ISOMessageParser.formatParsedMessage(parsedMessage));
-
-    // Find bit 39 (response code) and bit 48 (additional data)
-    String? bit39;
-    String? bit48;
-    String? bit62;
-
-    for (ParsedField field in parsedMessage.fields) {
-      if (field.bit == 39) {
-        bit39 = field.value;
-      } else if (field.bit == 48) {
-        bit48 = field.value;
-      } else if (field.bit == 62) {
-        bit62 = field.value;
+    try{
+      // Initialize bitmap parser
+      Isobitmapparsing.initialize(128);
+  
+      // Parse the message using ISOMessageParser
+      ParsedMessage parsedMessage = ISOMessageParser.parseMessage(isoMessage);
+  
+      // Print all parsed fields for debugging
+      print("=== Parsed ISO Message Fields ===");
+      print(ISOMessageParser.formatParsedMessage(parsedMessage));
+  
+      // Find bit 39 (response code) and bit 48 (additional data)
+      String? bit39;
+      String? bit48;
+      String? bit62;
+  
+      for (ParsedField field in parsedMessage.fields) {
+        if (field.bit == 39) {
+          bit39 = field.value;
+        } else if (field.bit == 48) {
+          bit48 = field.value;
+        } else if (field.bit == 62) {
+          bit62 = field.value;
+        }
       }
-    }
-
-    if (bit39 != null) {
-      if (bit39 != "00" && bit62 != null) {
-        return "Terjadi Kesalahan: $bit62";
+  
+      if (bit39 != null) {
+        if (bit39 != "00" && bit62 != null) {
+          return "Terjadi Kesalahan: $bit62";
+        }
+        return await processResponseCode(bit39, idpel, bit48, bit62, 0, isoMessage);
+      } else {
+        return "Bit 39 tidak ditemukan.";
       }
-      return await processResponseCode(bit39, idpel, bit48, bit62, 0, isoMessage);
-    } else {
-      return "Bit 39 tidak ditemukan.";
+    } catch (e) {
+      String? errorMessage = extractBit62Message(isoMessage);
+      if (errorMessage != null) {
+        return "Terjadi Kesalahan: $errorMessage";
+      }
+      return "Terjadi Kesalahan: Format ISO Message tidak valid";
     }
   }
 
@@ -153,9 +179,11 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
           await prefs.setString('idpel', idpel);
           await prefs.setString('SCREF', SCREF);
 
-          return "NAMA: $nama\n"
-              "NO. METER: $nometer\n"
-              "TARIF/DAYA: $tarif/$daya";
+          return """
+NAMA           : $nama
+NO. METER    : $nometer
+TARIF/DAYA   : $tarif/$daya
+          """;
         } else {
           return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
         }
@@ -171,29 +199,6 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
       latestCurrentIndex += lengthBit62;
       String bit62 = value; // Varible Message bit62
       return "Terjadi Kesalahan: $bit62";
-      // switch (bit39) {
-      //   case '09':
-      //     return 'Terjadi Kesalahan: NO. METER / IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
-      //   case '14':
-      //     return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
-      //   case '63':
-      //   case '16':
-      //     return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
-      //   case '18':
-      //     return 'Terjadi Kesalahan: TIMEOUT';
-      //   case '47':
-      //     return 'Terjadi Kesalahan: TOTAL KWH MELEBIHI BATAS MAKSIMUM';
-      //   case '77':
-      //     return 'Terjadi Kesalahan: NO. METER YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
-      //   case '78':
-      //     return 'Terjadi Kesalahan: NO. METER / IDPEL TIDAK DIIZINKAN UNTUK MELAKUKAN PEMBELIAN, HUBUNGI PLN TERDEKAT';
-      //   case '82':
-      //     return 'Terjadi Kesalahan: TAGIHAN BELUM TERSEDIA';
-      //   case '90':
-      //     return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
-      //   default:
-      //     return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
-      // }
     }
   }
 

@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'ISOMessageParser.dart';
+import 'ISOBitmapParsing.dart';
 
 class ISOMessageParsing {
   static List<String> bulanArray = [
@@ -19,100 +21,78 @@ class ISOMessageParsing {
   ];
 
   static List<dynamic>?
-      result; // Variabel statis untuk menyimpan hasil parse Bit 48
+      result;
 
-  // PROSES DEFINISIKAN ISO RESPONSE
-  // PANJANG LOOPING SESUAI DENGAN PANJANG KARAKTER BIT48, TOTAL JUMLAH TAGIHAN
-  Future<String> printResponse(String serverResponse, String idpel) async {
+  Future<String> printResponse(String idpel) async {
     try {
       // IDPEL 5363112222200 (13)
-      // String serverResponse =
-      //     "XX0210723A40010AC180000553504380000000000394800010210133500743410133501020103602116ALN32SATPZ01P33300000000000100"+
-      //     "54ALF0012010001451000001875363112222200MIGRASI PRABAYAR         2025010120250131536610029023DEV SAT NONTAGLIS 00     "+
-      //     "3D0F8E779B3F48C986E9DF2BA59F48182ALF210Z9C00B6FFABEC00000000039480000000000000394800000000000000360";
-      // print("Contoh Response: $serverResponse");
+      String serverResponse =
+          "XX0210723A40010AC180000553504380000000000394800010210133500743410133501020103602116ALN32SATPZ01P33300000000000100"+
+          "54ALF0012010001451000001875363112222200MIGRASI PRABAYAR         2025010120250131536610029023DEV SAT NONTAGLIS 00     "+
+          "3D0F8E779B3F48C986E9DF2BA59F48182ALF210Z9C00B6FFABEC00000000039480000000000000394800000000000000360";
+      
       return await parseISOResponse(serverResponse, idpel);
     } catch (e) {
-      // print("Failed to process response.");
-      // print(e);
-      // return e.toString();
       return "Terjadi Kesalahan, Silahkan Coba Lagi";
     }
   }
 
-  // PROSES DEFINISIKAN SETIAP BIT
+  static String? extractBit62Message(String isoMessage) {
+    try {
+      // Find position of "360" marker
+      int marker = isoMessage.indexOf("360");
+      if (marker == -1) return null;
+
+      // Extract length (3 characters after "360")
+      String lengthStr = isoMessage.substring(marker + 3, marker + 6);
+      int length = int.tryParse(lengthStr) ?? 0;
+      if (length == 0) return null;
+
+      // Extract message based on length
+      String message = isoMessage.substring(marker + 6, marker + 6 + length);
+      return message;
+    } catch (e) {
+      return null;
+    }
+  }
+
   static Future<String> parseISOResponse(
-      String isoMessage, String idpel) async {
-    String header = isoMessage.substring(0, 2);
-    String mti = isoMessage.substring(2, 6);
-    String primaryBitmapHex = isoMessage.substring(6, 22);
-    String primaryBitmapBinary = hexToBinary(primaryBitmapHex);
-
-    Map<int, int> bitLengths = {
-      3: 6,
-      4: 12,
-      7: 10,
-      11: 6,
-      12: 6,
-      13: 4,
-      15: 4,
-      18: 4,
-      32: -1, // Panjang variabel
-      37: 12,
-      39: 2,
-      41: 7,
-      42: 16,
-      48: -1, // Panjang variabel
-      49: 3
-    };
-
-    // Data Elements
-    int currentIndex = 22; // Setelah Primary Bitmap
-    String? bit39; // Deklarasi untuk menyimpan Bit 39
-    String? bit48; // Deklarasi untuk menyimpan Bit 48
-
-    for (int bit = 1; bit <= primaryBitmapBinary.length; bit++) {
-      if (primaryBitmapBinary[bit - 1] == '1') {
-        if (bit == 2 || bit == 32) {
-          // Bits dengan panjang variabel
-          int length =
-              int.parse(isoMessage.substring(currentIndex, currentIndex + 2));
-          currentIndex += 2; // Pindah ke data setelah length
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
-          currentIndex += length;
-        } else if (bit == 39) {
-          int length = bitLengths[bit]!;
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
-          currentIndex += length;
-          bit39 = value; // Simpan nilai Bit 39 ke variabel
-        } else if (bit == 48) {
-          int length =
-              int.parse(isoMessage.substring(currentIndex, currentIndex + 3));
-          currentIndex += 3; // Pindah ke data setelah length
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
-          currentIndex += length;
-          bit48 = value; // Simpan nilai Bit 48 ke variabel
-        } else if (bitLengths.containsKey(bit)) {
-          // Bits dengan panjang tetap
-          int length = bitLengths[bit]!;
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
-          currentIndex += length;
+    String isoMessage, String idpel) async {
+    try{
+      // Initialize bitmap parser
+      Isobitmapparsing.initialize(128);
+      // Parse the message using ISOMessageParser
+      ParsedMessage parsedMessage = ISOMessageParser.parseMessage(isoMessage);
+      // Print all parsed fields for debugging
+      print("=== Parsed ISO Message Fields ===");
+      print(ISOMessageParser.formatParsedMessage(parsedMessage));
+      // Find bit 39 (response code) and bit 48 (additional data)
+      String? bit39;
+      String? bit48;
+      String? bit62;
+      for (ParsedField field in parsedMessage.fields) {
+        if (field.bit == 39) {
+          bit39 = field.value;
+        } else if (field.bit == 48) {
+          bit48 = field.value;
+        } else if (field.bit == 62) {
+          bit62 = field.value;
         }
       }
-    }
-
-    int latestCurrentIndex = currentIndex;
-
-    // Proses Bit 39
-    if (bit39 != null) {
-      return await processResponseCode(
-          bit39, idpel, bit48, latestCurrentIndex, isoMessage);
-    } else {
-      return "Bit 39 tidak ditemukan.";
+      if (bit39 != null) {
+        if (bit39 != "00" && bit62 != null) {
+          return "Terjadi Kesalahan: $bit62";
+        }
+        return await processResponseCode(bit39, idpel, bit48, 0, isoMessage);
+      } else {
+        return "Bit 39 tidak ditemukan.";
+      }
+    } catch (e) {
+      String? errorMessage = extractBit62Message(isoMessage);
+      if (errorMessage != null) {
+        return "Terjadi Kesalahan: $errorMessage";
+      }
+      return "Terjadi Kesalahan: Format ISO Message tidak valid";
     }
   }
 
@@ -218,61 +198,19 @@ class ISOMessageParsing {
         await prefs.setInt('totalBayar', totalBayar);
         await prefs.setInt('admin', admin);
 
-        return "NOMOR REGISTRASI: $noRegistrasi\n"
-                "JENIS TRANSAKSI: $transaksi\n"
-                "NAMA: $nama\n"
-                "RP. BAYAR: $formattedTotalTagihan\n"
-                "ADMIN BANK: $formattedAdmin\n"
-                "TOTAL BAYAR: $formattedTotBay"
-            .trim();
-        // return "gacor lek ku";
-        // return bit48;
+        return """
+NOMOR REGISTRASI  : $noRegistrasi
+JENIS TRANSAKSI      : $transaksi
+NAMA                      : $nama
+RP. BAYAR                : $formattedTotalTagihan
+ADMIN BANK            : $formattedAdmin
+TOTAL BAYAR           : $formattedTotBay
+""".trim();
       } else {
-        // return "Bit 39 == 00 tetapi Bit 48 tidak tersedia.";
-        return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
+        return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Response Code";
       }
     } else {
-      int lengthBit62 = int.parse(
-          isoMessage.substring(latestCurrentIndex, latestCurrentIndex + 3));
-      latestCurrentIndex += 3; // Pindah ke data setelah length
-      String value = isoMessage.substring(
-          latestCurrentIndex, latestCurrentIndex + lengthBit62);
-      latestCurrentIndex += lengthBit62;
-      String bit62 = value; // Varible Message bit62
-      return "Terjadi Kesalahan: $bit62";
-
-      // switch (bit39) {
-      //   case '14':
-      //   case '77':
-      //     return 'Terjadi Kesalahan: IDPEL YANG ANDA MASUKAN SALAH, MOHON TELITI KEMBALI';
-      //   case '82':
-      //     return 'Terjadi Kesalahan: TAGIHAN BULAN BERJALAN BELUM TERSEDIA';
-      //   case '89':
-      //     return 'Terjadi Kesalahan: PAYMENT MELEBIHI BATAS WAKTU YANG DITENTUKAN';
-      //   case '90':
-      //     return 'Terjadi Kesalahan: TRANSAKSI CUT OFF';
-      //   case '63':
-      //   case '16':
-      //     return 'Terjadi Kesalahan: KONSUMEN IDPEL $idpel DIBLOKIR HUBUNGI PLN';
-      //   case '34':
-      //     return 'Terjadi Kesalahan: TAGIHAN SUDAH TERBAYAR';
-      //   case '18':
-      //     return 'Terjadi Kesalahan: TIMEOUT';
-      //   case '48':
-      //     return 'Terjadi Kesalahan: NOMOR REGISTRASI KADALUARSA, MOHON HUBUNGI PLN';
-      //   default:
-      //     return "Terjadi Kesalahan: Kode Bit 39 tidak dikenali.";
-      // }
+      return "Terjadi Kesalahan: Terjadi Kegagalan Saat Cek Data";
     }
-  }
-
-  static String hexToBinary(String hex) {
-    StringBuffer binary = StringBuffer();
-    for (int i = 0; i < hex.length; i++) {
-      int decimal = int.parse(hex[i], radix: 16);
-      String binarySegment = decimal.toRadixString(2).padLeft(4, '0');
-      binary.write(binarySegment);
-    }
-    return binary.toString();
   }
 }
