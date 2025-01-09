@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'ISOMessageParser.dart';
+import 'ISOBitmapParsing.dart';
 
 class ISOMessageParsing {
   static List<String> bulanArray = [
@@ -24,20 +26,16 @@ class ISOMessageParsing {
   static List<dynamic>?
       result62; // Variabel statis untuk menyimpan hasil parse Bit 62
 
-  // PROSES DEFINISIKAN ISO RESPONSE
-  // PANJANG LOOPING SESUAI DENGAN PANJANG KARAKTER BIT48, TOTAL JUMLAH TAGIHAN
-  Future<String> printResponse(String serverResponse, String idpel) async {
+  Future<String> printResponse(String idpel) async {
     try {
       // IDPEL 542111228822
-      // String serverResponse =
-      //     "XX0210723A40010AC180040553502380000000000000000121816015700743416015712181219602116ALN32SATPZ01P333000000000001"+
-      //     "0054ALF001201000145100000"+
-      //     "133JTL53L31410161770054211122882209362F3DDA3824510B3BF68DE226117952ALF210Z25355EED4B315710A05D1B2BDEV SAT PREPAID          R3  000007700360"+
-      //     "0505454211               0000020000050000000000200000";
+      String serverResponse =
+          "XX0210723A40010AC180040553502380000000000000000121816015700743416015712181219602116ALN32SATPZ01P333000000000001"+
+          "0054ALF001201000145100000"+
+          "133JTL53L31410161770054211122882209362F3DDA3824510B3BF68DE226117952ALF210Z25355EED4B315710A05D1B2BDEV SAT PREPAID          R3  000007700360"+
+          "0505454211               0000020000050000000000200000";
           // 0000020000050000000000200000
           // 0000000000000000000000000000
-      print("Contoh Response: $serverResponse");
-      // Tunggu hasil dari parseISOResponse yang bisa asinkron
       return await parseISOResponse(serverResponse, idpel);
     } catch (e) {
       // return e.toString();
@@ -48,82 +46,36 @@ class ISOMessageParsing {
   // PROSES DEFINISIKAN SETIAP BIT
   static Future<String> parseISOResponse(
       String isoMessage, String idpel) async {
-    String header = isoMessage.substring(0, 2);
-    String mti = isoMessage.substring(2, 6);
-    String primaryBitmapHex = isoMessage.substring(6, 22);
-    String primaryBitmapBinary = hexToBinary(primaryBitmapHex);
+    // Initialize bitmap parser
+    Isobitmapparsing.initialize(128);
 
-    Map<int, int> bitLengths = {
-      3: 6,
-      4: 12,
-      7: 10,
-      11: 6,
-      12: 6,
-      13: 4,
-      15: 4,
-      18: 4,
-      32: -1, // Panjang variabel
-      37: 12,
-      39: 2,
-      41: 7,
-      42: 16,
-      48: -1, // Panjang variabel
-      49: 3
-    };
+    // Parse the message using ISOMessageParser
+    ParsedMessage parsedMessage = ISOMessageParser.parseMessage(isoMessage);
 
-    int currentIndex = 22;
+    // Print all parsed fields for debugging
+    print("=== Parsed ISO Message Fields ===");
+    print(ISOMessageParser.formatParsedMessage(parsedMessage));
+
+    // Find bit 39 (response code) and bit 48 (additional data)
     String? bit39;
     String? bit48;
     String? bit62;
 
-    for (int bit = 1; bit <= primaryBitmapBinary.length; bit++) {
-      if (primaryBitmapBinary[bit - 1] == '1') {
-        if (bit == 2 || bit == 32) {
-          // Bits dengan panjang variabel
-          int length =
-              int.parse(isoMessage.substring(currentIndex, currentIndex + 2));
-          currentIndex += 2; // Pindah ke data setelah length
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
-          currentIndex += length;
-        } else if (bit == 39) {
-          int length = bitLengths[bit]!;
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
-          currentIndex += length;
-          bit39 = value; // Simpan nilai Bit 39 ke variabel
-        } else if (bit == 48) {
-          // Bits dengan panjang variabel
-          int length =
-              int.parse(isoMessage.substring(currentIndex, currentIndex + 3));
-          currentIndex += 3; // Pindah ke data setelah length
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
-          currentIndex += length;
-          bit48 = value; // Simpan nilai Bit 48 ke variabel
-        } else if (bit == 62) {
-          // Bits dengan panjang variabel
-          int length =
-              int.parse(isoMessage.substring(currentIndex, currentIndex + 3));
-          currentIndex += 3; // Pindah ke data setelah length
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
-          currentIndex += length;
-          bit62 = value; // Simpan nilai Bit 48 ke variabel
-        } else if (bitLengths.containsKey(bit)) {
-          // Bits dengan panjang tetap
-          int length = bitLengths[bit]!;
-          String value =
-              isoMessage.substring(currentIndex, currentIndex + length);
-          currentIndex += length;
-        }
+    for (ParsedField field in parsedMessage.fields) {
+      if (field.bit == 39) {
+        bit39 = field.value;
+      } else if (field.bit == 48) {
+        bit48 = field.value;
+      } else if (field.bit == 62) {
+        bit62 = field.value;
       }
     }
 
-    int latestCurrentIndex = currentIndex;
-
     if (bit39 != null) {
-      return await processResponseCode(bit39, idpel, bit48, bit62, latestCurrentIndex, isoMessage);
+      if (bit39 != "00" && bit62 != null) {
+        return "Terjadi Kesalahan: $bit62";
+      }
+      return await processResponseCode(bit39, idpel, bit48, bit62, 0, isoMessage);
     } else {
       return "Bit 39 tidak ditemukan.";
     }
@@ -300,15 +252,5 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
     }
 
     return [kodeDist, kodeUnit, telpUnit, totalUnsoldVal, dataPerulanganVal];
-  }
-
-  static String hexToBinary(String hex) {
-    StringBuffer binary = StringBuffer();
-    for (int i = 0; i < hex.length; i++) {
-      int decimal = int.parse(hex[i], radix: 16);
-      String binarySegment = decimal.toRadixString(2).padLeft(4, '0');
-      binary.write(binarySegment);
-    }
-    return binary.toString();
   }
 }

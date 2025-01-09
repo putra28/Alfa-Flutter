@@ -75,83 +75,83 @@ class _PrepaidScreenState extends State<prepaid_screen> {
       final isoMessage = processor.createIsoMessage(_controller.text, productCode);
       final isoMessagetoSent = 'XX' + isoMessage;
 
-      // final parsingISO = await processorParsing.printResponse(_controller.text);
-      // if (parsingISO.startsWith("Terjadi Kesalahan")) {
-      //   String serverResponseClean =
-      //       parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-      //   QuickAlert.show(
-      //     context: context,
-      //     type: QuickAlertType.error,
-      //     title: 'Terjadi Kesalahan',
-      //     text: serverResponseClean,
-      //     confirmBtnText: 'OK',
-      //     confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //   );
-      //   _controller.clear();
-      // } else {
-      //   SharedPreferences prefs = await SharedPreferences.getInstance();
-      //   String? Method = "Get Denom Prepaid";
-      //   String? IDToko = prefs.getString('IDToko');
-      //   Map<String, dynamic> dataToSend = {
-      //     "var_kdtoko": IDToko,
-      //   };
+      final parsingISO = await processorParsing.printResponse(_controller.text);
+      if (parsingISO.startsWith("Terjadi Kesalahan")) {
+        String serverResponseClean =
+            parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Terjadi Kesalahan',
+          text: serverResponseClean,
+          confirmBtnText: 'OK',
+          confirmBtnColor: Theme.of(context).colorScheme.primary,
+        );
+        _controller.clear();
+      } else {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String? Method = "Get Denom Prepaid";
+        String? IDToko = prefs.getString('IDToko');
+        Map<String, dynamic> dataToSend = {
+          "var_kdtoko": IDToko,
+        };
 
-      //   try {
-      //     await BookingAntrian.GetDenom(Method!, dataToSend!);
-      //   } catch (e) {
-      //     QuickAlert.show(
-      //       context: context,
-      //       type: QuickAlertType.error,
-      //       title: 'Terjadi Kesalahan',
-      //       text: 'Gagal terkoneksi dengan server',
-      //       confirmBtnText: 'OK',
-      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //     );
-      //     return;
-      //   }
-      //   setState(() {
-      //     _outputISOMessage = isoMessage;
-      //     _outputISOMessageParsing = parsingISO.trim();
-      //   });
-      // }
-
-      try {
-        String serverResponse = await processorInquiry
-            .sendISOMessage(isoMessagetoSent); // Asynchronous call
-        if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-          final parsingISO = await processorParsing.printResponse(
-              serverResponse, _controller.text); // Await response here
-          if (parsingISO.startsWith("Terjadi Kesalahan")) {
-            String serverResponseClean =
-                parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-            QuickAlert.show(
-              context: context,
-              type: QuickAlertType.error,
-              title: serverResponseClean,
-              confirmBtnText: 'OK',
-              confirmBtnColor: Theme.of(context).colorScheme.primary,
-            );
-            _controller.clear();
-          } else {
-            setState(() {
-              _outputISOMessageParsing = parsingISO;
-            });
-          }
-        } else {
-          String serverResponseClean =
-              serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+        try {
+          await BookingAntrian.GetDenom(Method!, dataToSend!);
+        } catch (e) {
           QuickAlert.show(
             context: context,
             type: QuickAlertType.error,
-            title: serverResponseClean,
+            title: 'Terjadi Kesalahan',
+            text: 'Gagal terkoneksi dengan server',
             confirmBtnText: 'OK',
             confirmBtnColor: Theme.of(context).colorScheme.primary,
           );
-          _controller.clear();
+          return;
         }
-      } catch (e) {
-        print('Error: $e');
+        setState(() {
+          _outputISOMessage = isoMessage;
+          _outputISOMessageParsing = parsingISO.trim();
+        });
       }
+
+      // try {
+      //   String serverResponse = await processorInquiry
+      //       .sendISOMessage(isoMessagetoSent); // Asynchronous call
+      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+      //     final parsingISO = await processorParsing.printResponse(
+      //         serverResponse, _controller.text); // Await response here
+      //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
+      //       String serverResponseClean =
+      //           parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+      //       QuickAlert.show(
+      //         context: context,
+      //         type: QuickAlertType.error,
+      //         title: serverResponseClean,
+      //         confirmBtnText: 'OK',
+      //         confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //       );
+      //       _controller.clear();
+      //     } else {
+      //       setState(() {
+      //         _outputISOMessageParsing = parsingISO;
+      //       });
+      //     }
+      //   } else {
+      //     String serverResponseClean =
+      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+      //     QuickAlert.show(
+      //       context: context,
+      //       type: QuickAlertType.error,
+      //       title: serverResponseClean,
+      //       confirmBtnText: 'OK',
+      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //     );
+      //     _controller.clear();
+      //   }
+      // } catch (e) {
+      //   print('Error: $e');
+      // }
     }
   }
 
