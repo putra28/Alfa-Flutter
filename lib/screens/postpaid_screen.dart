@@ -237,7 +237,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               text: 'PLN Postpaid \n',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.04,
+                                  fontSize: width * 0.05,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -247,7 +247,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               text: '$_outputISOMessageParsing',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.04,
+                                  fontSize: width * 0.05,
                                   color: Colors.black,
                                 ),
                               ),
@@ -277,7 +277,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                             'Clear Data',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.04,
+                                fontSize: width * 0.045,
                                 color: const Color.fromARGB(255, 255, 255, 255),
                               ),
                             ),
@@ -350,7 +350,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
                             textAlign: TextAlign.center,
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.04,
+                                fontSize: width * 0.045,
                                 color: const Color.fromARGB(255, 255, 255, 255),
                               ),
                             ),

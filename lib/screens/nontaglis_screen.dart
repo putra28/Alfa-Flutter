@@ -235,7 +235,7 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                               text: 'PLN nontaglis \n',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.04,
+                                  fontSize: width * 0.05,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -245,7 +245,7 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                               text: '$_outputISOMessageParsing',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.04,
+                                  fontSize: width * 0.05,
                                   color: Colors.black,
                                 ),
                               ),
@@ -275,7 +275,7 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                             'Clear Data',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.04,
+                                fontSize: width * 0.045,
                                 color: const Color.fromARGB(255, 255, 255, 255),
                               ),
                             ),
@@ -322,7 +322,7 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                                 context: context,
                                 type: QuickAlertType.success,
                                 title: 'Berhasil Booking No. Antrian',
-                                text: "No. Antrian : ${prefs.getString('noantrian')}"
+                                text: "No. Antrian : ${prefs.getString('noantrian')}\n"
                                     + "ID Pelanggan : ${prefs.getString('idPelanggan')}",
                                 confirmBtnText: 'OK',
                                 confirmBtnColor: Colors.green,
@@ -344,7 +344,7 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                             textAlign: TextAlign.center,
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.04,
+                                fontSize: width * 0.045,
                                 color: const Color.fromARGB(255, 255, 255, 255),
                               ),
                             ),

@@ -286,7 +286,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             text: 'PLN Prepaid \n',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.04,
+                                fontSize: width * 0.05,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
@@ -296,7 +296,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             text: '$_outputISOMessageParsing\n',
                             style: GoogleFonts.dongle(
                               textStyle: TextStyle(
-                                fontSize: width * 0.04,
+                                fontSize: width * 0.05,
                                 color: Colors.black,
                               ),
                             ),
@@ -306,7 +306,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                               text: 'PILIH DENOM : $_denomValue',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.04,
+                                  fontSize: width * 0.05,
                                   color: Colors.black,
                                 ),
                               ),
@@ -328,7 +328,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                                   'ADMIN BANK  : $_formattedAdmin\nTOTAL BAYAR : $_totBayarValue',
                               style: GoogleFonts.dongle(
                                 textStyle: TextStyle(
-                                  fontSize: width * 0.04,
+                                  fontSize: width * 0.05,
                                   color: Colors.black,
                                 ),
                               ),
@@ -362,7 +362,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                           'Clear Data',
                           style: GoogleFonts.dongle(
                             textStyle: TextStyle(
-                              fontSize: width * 0.04,
+                              fontSize: width * 0.045,
                               color: const Color.fromARGB(255, 255, 255, 255),
                             ),
                           ),
@@ -453,7 +453,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                           textAlign: TextAlign.center,
                           style: GoogleFonts.dongle(
                             textStyle: TextStyle(
-                              fontSize: width * 0.04,
+                              fontSize: width * 0.045,
                               color: const Color.fromARGB(255, 255, 255, 255),
                             ),
                           ),
