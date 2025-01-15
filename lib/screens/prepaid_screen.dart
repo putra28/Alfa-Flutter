@@ -402,6 +402,9 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             String? idpel = prefs.getString('idpel');
                             String? SCREF = prefs.getString('SCREF');
                             int? adminTotal = 3500;
+                            String _denomString =
+                                NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0)
+                                    .format(_selectedDenom);
 
                             Map<String, dynamic> dataToSend = {
                               "var_kdtoko": IDToko,
@@ -425,9 +428,11 @@ class _PrepaidScreenState extends State<prepaid_screen> {
                             QuickAlert.show(
                               context: context,
                               type: QuickAlertType.success,
-                              title: 'Berhasil Melakukan Booking No. Antrian',
+                              title: 'Berhasil Booking No. Antrian',
                               text:
-                                  "No. Antrian : ${prefs.getString('noantrian')}",
+                                  "No. Antrian : ${prefs.getString('noantrian')}\n"
+                                    + "ID Pelanggan : ${prefs.getString('idpel')}\n"
+                                    + "Denom : $_denomString",
                               confirmBtnText: 'OK',
                               confirmBtnColor: Colors.green,
                             );

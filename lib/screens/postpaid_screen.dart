@@ -326,9 +326,10 @@ class _postpaid_screenState extends State<postpaid_screen> {
                               QuickAlert.show(
                                 context: context,
                                 type: QuickAlertType.success,
-                                title: 'Berhasil Melakukan Booking No. Antrian',
+                                title: 'Berhasil Booking No. Antrian',
                                 text:
-                                    "No. Antrian : ${prefs.getString('noantrian')}",
+                                    "No. Antrian : ${prefs.getString('noantrian')}\n"
+                                    + "ID Pelanggan : ${prefs.getString('idPelanggan')}",
                                 confirmBtnText: 'OK',
                                 confirmBtnColor: Colors.green,
                               );

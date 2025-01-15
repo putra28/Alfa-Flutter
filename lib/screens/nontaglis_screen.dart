@@ -321,8 +321,9 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
                               QuickAlert.show(
                                 context: context,
                                 type: QuickAlertType.success,
-                                title: 'Berhasil Melakukan Booking No. Antrian',
-                                text: "No. Antrian : ${prefs.getString('noantrian')}",
+                                title: 'Berhasil Booking No. Antrian',
+                                text: "No. Antrian : ${prefs.getString('noantrian')}"
+                                    + "ID Pelanggan : ${prefs.getString('idPelanggan')}",
                                 confirmBtnText: 'OK',
                                 confirmBtnColor: Colors.green,
                               );
