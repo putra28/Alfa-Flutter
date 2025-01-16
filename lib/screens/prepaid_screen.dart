@@ -2,8 +2,8 @@
 // import 'package:flutter/material.dart';
 // import 'package:google_fonts/google_fonts.dart';
 // import 'package:shimmer/shimmer.dart';
-// import '../services/ISOMessageCreate.dart'; 
-// import '../services/Prepaid_ISOMessageParsing.dart'; 
+// import '../services/ISOMessageCreate.dart';
+// import '../services/Prepaid_ISOMessageParsing.dart';
 // import '../widgets/CustomRadioWidget.dart';
 // import 'package:quickalert/quickalert.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
@@ -123,7 +123,7 @@
 //         confirmBtnColor: Theme.of(context).colorScheme.primary,
 //       );
 //       return;
-//     } 
+//     }
 //     setState(() {
 //       _isLoading = true;
 //       _outputISOMessageParsing = "";
@@ -141,7 +141,7 @@
 //       await Future.delayed(Duration(seconds: 3));
 
 //       final parsingISO = await processorParsing.printResponse(_controller.text);
-      
+
 //       if (parsingISO.startsWith("Terjadi Kesalahan")) {
 //           setState(() {
 //             _isLoading = false;
@@ -157,7 +157,7 @@
 //           );
 //           _controller.clear();
 //           return;
-//         } 
+//         }
 //         try {
 //           SharedPreferences prefs = await SharedPreferences.getInstance();
 //           String? Method = "Get Denom Prepaid";
@@ -178,7 +178,7 @@
 //           setState(() {
 //             _isLoading = false;
 //           });
-    
+
 //           QuickAlert.show(
 //             context: context,
 //             type: QuickAlertType.error,
@@ -192,7 +192,7 @@
 //         setState(() {
 //           _isLoading = false;
 //         });
-  
+
 //         QuickAlert.show(
 //           context: context,
 //           type: QuickAlertType.error,
@@ -203,7 +203,6 @@
 //         );
 //         _controller.clear();
 //       }
-    
 
 //     //   String serverResponse = await processorInquiry .sendISOMessage(isoMessagetoSent); // Asynchronous call
 //     //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
@@ -212,7 +211,7 @@
 //     //     setState(() {
 //     //       _isLoading = false;
 //     //     });
-        
+
 //     //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
 //     //       String serverResponseClean = parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
 //     //       QuickAlert.show(
@@ -242,7 +241,7 @@
 //     //       confirmBtnColor: Theme.of(context).colorScheme.primary,
 //     //     );
 //     //   }
-//     // } 
+//     // }
 //     // catch (e) {
 //     //   setState(() {
 //     //     _isLoading = false;
@@ -601,7 +600,6 @@ class _PrepaidScreenState extends State<prepaid_screen> {
     decimalDigits: 0,
   );
 
-  String _outputISOMessage = "";
   String _outputISOMessageParsing = "";
   String? _denomValue = "";
   String? _totBayarValue = "";
@@ -706,37 +704,87 @@ class _PrepaidScreenState extends State<prepaid_screen> {
       });
 
       final processor = Isomessagecreate();
+      final processorInquiry = InquiryServices();
       final processorParsing = ISOMessageParsing();
       String productCode = "53502";
-      final isoMessage = processor.createIsoMessage(_controller.text, productCode);
+      final isoMessagetoSent =
+          "XX" + processor.createIsoMessage(_controller.text, productCode);
 
       // Simulate loading time
       await Future.delayed(Duration(seconds: 3));
 
-        final parsingISO = await processorParsing.printResponse(_controller.text);
-        
-        if (parsingISO.startsWith("Terjadi Kesalahan")) {
-          throw Exception(parsingISO.replaceFirst("Terjadi Kesalahan: ", ""));
-        }
-  
-        // Get denom data
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        String Method = "Get Denom Prepaid";
-        String? IDToko = prefs.getString('IDToko');
-        
-        await BookingAntrian.GetDenom(Method, {"var_kdtoko": IDToko});
-  
-        setState(() {
-          _isLoading = false;
-          _outputISOMessage = isoMessage;
-          _outputISOMessageParsing = parsingISO.trim();
-        });
+      final parsingISO = await processorParsing.printResponse(_controller.text);
 
+      if (parsingISO.startsWith("Terjadi Kesalahan")) {
+        throw Exception(parsingISO.replaceFirst("Terjadi Kesalahan: ", ""));
+      }
+
+      // Get denom data
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String Method = "Get Denom Prepaid";
+          String? IDToko = prefs.getString('IDToko');
+
+          await BookingAntrian.GetDenom(Method, {"var_kdtoko": IDToko});
+
+          setState(() {
+            _isLoading = false;
+            _outputISOMessageParsing = parsingISO.trim();
+          });
+
+      // String serverResponse = await processorInquiry.sendISOMessage(isoMessagetoSent); // Asynchronous call
+      // if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+      //   final parsingISO = await processorParsing.printResponse(
+      //       serverResponse, _controller.text);
+      //   setState(() {
+      //     _isLoading = false;
+      //   });
+      //   if (parsingISO.startsWith("Terjadi Kesalahan")) {
+      //     String serverResponseClean =
+      //         parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+      //     QuickAlert.show(
+      //       context: context,
+      //       type: QuickAlertType.error,
+      //       title: serverResponseClean,
+      //       confirmBtnText: 'OK',
+      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //     );
+      //     _controller.clear();
+      //   } else {
+      //     setState(() {
+      //       _outputISOMessageParsing = parsingISO;
+      //     });
+          
+      //     // Get denom data
+      //     SharedPreferences prefs = await SharedPreferences.getInstance();
+      //     String Method = "Get Denom Prepaid";
+      //     String? IDToko = prefs.getString('IDToko');
+
+      //     await BookingAntrian.GetDenom(Method, {"var_kdtoko": IDToko});
+
+      //     setState(() {
+      //       _isLoading = false;
+      //       _outputISOMessageParsing = parsingISO.trim();
+      //     });
+      //   }
+      // } else {
+      //   setState(() {
+      //     _isLoading = false;
+      //   });
+      //   String serverResponseClean = serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+      //   _controller.clear();
+      //   QuickAlert.show(
+      //     context: context,
+      //     type: QuickAlertType.error,
+      //     title: serverResponseClean,
+      //     confirmBtnText: 'OK',
+      //     confirmBtnColor: Theme.of(context).colorScheme.primary,
+      //   );
+      // }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      
+
       _showError('Terjadi Kesalahan', e.toString());
       _controller.clear();
     }
@@ -760,15 +808,6 @@ class _PrepaidScreenState extends State<prepaid_screen> {
 
       await BookingAntrian.bookingAntrian(Method, dataToSend);
 
-      setState(() {
-        _controller.clear();
-        _outputISOMessageParsing = "";
-        _selectedDenom = 0;
-        _denomValue = "";
-        _totalBayar = 0;
-        _totBayarValue = "";
-      });
-
       QuickAlert.show(
         context: context,
         type: QuickAlertType.success,
@@ -779,6 +818,14 @@ class _PrepaidScreenState extends State<prepaid_screen> {
         confirmBtnText: 'OK',
         confirmBtnColor: Colors.green,
       );
+      setState(() {
+        _controller.clear();
+        _outputISOMessageParsing = "";
+        _selectedDenom = 0;
+        _denomValue = "";
+        _totalBayar = 0;
+        _totBayarValue = "";
+      });
     } catch (e) {
       _showError('Terjadi Kesalahan', 'Gagal Melakukan Booking No. Antrian');
     }
@@ -984,7 +1031,8 @@ class _PrepaidScreenState extends State<prepaid_screen> {
             ),
             RichText(
               text: TextSpan(
-                text: 'ADMIN BANK  : $_formattedAdmin\nTOTAL BAYAR : $_totBayarValue',
+                text:
+                    'ADMIN BANK  : $_formattedAdmin\nTOTAL BAYAR : $_totBayarValue',
                 style: GoogleFonts.dongle(
                   textStyle: TextStyle(
                     fontSize: width * 0.05,
