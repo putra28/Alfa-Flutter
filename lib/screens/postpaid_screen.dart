@@ -101,13 +101,15 @@ class _postpaid_screenState extends State<postpaid_screen> {
         confirmBtnColor: Theme.of(context).colorScheme.primary,
       );
       return;
-    } else {
-      setState(() {
-        _isLoading = true;
-        _outputISOMessageParsing = "";
-      });
-      
+    }
+    setState(() {
+      _isLoading = true;
+      _outputISOMessageParsing = "";
+    });
+
+    try {
       final processor = Isomessagecreate();
+      final processorInquiry = InquiryServices();
       final processorParsing = ISOMessageParsing();
       String productCode = "14501";
       final isoMessage =
@@ -136,44 +138,60 @@ class _postpaid_screenState extends State<postpaid_screen> {
           _outputISOMessageParsing = parsingISO.trim();
         }
       });
+    }
 
-      // try {
-      //   String serverResponse =
-      //       await processorInquiry.sendISOMessage(isoMessagetoSent);
-      //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
-      //     final parsingISO = await processorParsing.printResponse(
-      //         serverResponse, _controller.text);
-      //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
-      //       String serverResponseClean =
-      //           parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-      //       QuickAlert.show(
-      //         context: context,
-      //         type: QuickAlertType.error,
-      //         title: serverResponseClean,
-      //         confirmBtnText: 'OK',
-      //         confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //       );
-      //       _controller.clear();
-      //     } else {
-      //       setState(() {
-      //         _outputISOMessageParsing = parsingISO;
-      //       });
-      //     }
-      //   } else {
-      //     String serverResponseClean =
-      //         serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
-      //     QuickAlert.show(
-      //       context: context,
-      //       type: QuickAlertType.error,
-      //       title: serverResponseClean,
-      //       confirmBtnText: 'OK',
-      //       confirmBtnColor: Theme.of(context).colorScheme.primary,
-      //     );
-      //     _controller.clear();
-      //   }
-      // } catch (e) {
-      //   print('Error: $e');
-      // }
+    //   String serverResponse = await processorInquiry.sendISOMessage(isoMessagetoSent);
+    //   if (!serverResponse.startsWith("Terjadi Kesalahan")) {
+    //     final parsingISO = await processorParsing.printResponse(
+    //         serverResponse, _controller.text);
+
+    //     setState(() {
+    //       _isLoading = false;
+    //     });
+
+    //     if (parsingISO.startsWith("Terjadi Kesalahan")) {
+    //       String serverResponseClean = parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+    //       QuickAlert.show(
+    //         context: context,
+    //         type: QuickAlertType.error,
+    //         title: serverResponseClean,
+    //         confirmBtnText: 'OK',
+    //         confirmBtnColor: Theme.of(context).colorScheme.primary,
+    //       );
+    //       _controller.clear();
+    //     } else {
+    //       setState(() {
+    //         _outputISOMessageParsing = parsingISO;
+    //       });
+    //     }
+    //   } else {
+    //     setState(() {
+    //       _isLoading = false;
+    //     });
+    //     String serverResponseClean = serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
+    //     _controller.clear();
+    //     QuickAlert.show(
+    //       context: context,
+    //       type: QuickAlertType.error,
+    //       title: serverResponseClean,
+    //       confirmBtnText: 'OK',
+    //       confirmBtnColor: Theme.of(context).colorScheme.primary,
+    //     );
+    //   }
+    // }
+    catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Terjadi Kesalahan',
+        text: 'Gagal melakukan permintaan ke server',
+        confirmBtnText: 'OK',
+        confirmBtnColor: Theme.of(context).colorScheme.primary,
+      );
+      _controller.clear();
     }
   }
 
@@ -272,7 +290,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
               ),
               SizedBox(height: height * 0.02),
               if (_isLoading)
-              _buildShimmerEffect()
+                _buildShimmerEffect()
               else if (_outputISOMessageParsing.isEmpty)
                 Column(
                   children: [
@@ -289,7 +307,6 @@ class _postpaid_screenState extends State<postpaid_screen> {
                     ),
                   ],
                 )
-
               else if (!_outputISOMessageParsing.isEmpty)
                 Container(
                   alignment: Alignment.centerLeft,
