@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 import '../services/ISOMessageCreate.dart';
 import '../services/Postpaid_ISOMessageParsing.dart';
 import 'package:quickalert/quickalert.dart';
@@ -21,6 +22,62 @@ class _postpaid_screenState extends State<postpaid_screen> {
   final TextEditingController _controller = TextEditingController();
   String _outputISOMessage = "";
   String _outputISOMessageParsing = "";
+  bool _isLoading = false;
+
+  Widget _buildShimmerEffect() {
+    return Container(
+      margin: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.04),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'PLN Postpaid',
+              style: GoogleFonts.dongle(
+                textStyle: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width * 0.05,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(height: 8),
+            _buildShimmerRow("ID Pelanggan"),
+            _buildShimmerRow("Nama"),
+            _buildShimmerRow("Tarif/Daya"),
+            _buildShimmerRow("Periode"),
+            _buildShimmerRow("Tagihan"),
+            _buildShimmerRow("Admin"),
+            _buildShimmerRow("Total Bayar"),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerRow(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 100,
+            height: 20,
+            color: Colors.white,
+          ),
+          Text(" : "),
+          Expanded(
+            child: Container(
+              height: 20,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _handleSubmit() async {
     if (_controller.text.length < 12) {
@@ -45,33 +102,40 @@ class _postpaid_screenState extends State<postpaid_screen> {
       );
       return;
     } else {
+      setState(() {
+        _isLoading = true;
+        _outputISOMessageParsing = "";
+      });
+      
       final processor = Isomessagecreate();
-      final processorInquiry = InquiryServices();
       final processorParsing = ISOMessageParsing();
-      // final processorParsing = ISOMessageParser();
       String productCode = "14501";
       final isoMessage =
           processor.createIsoMessage(_controller.text, productCode);
       final isoMessagetoSent = 'XX' + isoMessage;
 
+      // Simulate loading time
+      await Future.delayed(Duration(seconds: 3));
+
       final parsingISO = await processorParsing.printResponse(_controller.text);
-      if (parsingISO.startsWith("Terjadi Kesalahan")) {
-        String serverResponseClean =
-            parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
-        QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: serverResponseClean,
-          confirmBtnText: 'OK',
-          confirmBtnColor: Theme.of(context).colorScheme.primary,
-        );
-        _controller.clear();
-      } else {
-        setState(() {
+      setState(() {
+        _isLoading = false;
+        if (parsingISO.startsWith("Terjadi Kesalahan")) {
+          String serverResponseClean =
+              parsingISO.replaceFirst("Terjadi Kesalahan: ", "");
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: serverResponseClean,
+            confirmBtnText: 'OK',
+            confirmBtnColor: Theme.of(context).colorScheme.primary,
+          );
+          _controller.clear();
+        } else {
           _outputISOMessage = isoMessage;
           _outputISOMessageParsing = parsingISO.trim();
-        });
-      }
+        }
+      });
 
       // try {
       //   String serverResponse =
@@ -207,7 +271,9 @@ class _postpaid_screenState extends State<postpaid_screen> {
                 ],
               ),
               SizedBox(height: height * 0.02),
-              if (_outputISOMessageParsing.isEmpty)
+              if (_isLoading)
+              _buildShimmerEffect()
+              else if (_outputISOMessageParsing.isEmpty)
                 Column(
                   children: [
                     Image.asset('assets/images/albi.png',
@@ -222,8 +288,9 @@ class _postpaid_screenState extends State<postpaid_screen> {
                       ),
                     ),
                   ],
-                ),
-              if (!_outputISOMessageParsing.isEmpty)
+                )
+
+              else if (!_outputISOMessageParsing.isEmpty)
                 Container(
                   alignment: Alignment.centerLeft,
                   margin: EdgeInsets.symmetric(horizontal: width * 0.04),
@@ -327,9 +394,8 @@ class _postpaid_screenState extends State<postpaid_screen> {
                                 context: context,
                                 type: QuickAlertType.success,
                                 title: 'Berhasil Booking No. Antrian',
-                                text:
-                                    "No. Antrian : ${prefs.getString('noantrian')}\n"
-                                    + "ID Pelanggan : ${prefs.getString('idPelanggan')}",
+                                text: "No. Antrian : ${prefs.getString('noantrian')}\n" +
+                                    "ID Pelanggan : ${prefs.getString('idPelanggan')}",
                                 confirmBtnText: 'OK',
                                 confirmBtnColor: Colors.green,
                               );
