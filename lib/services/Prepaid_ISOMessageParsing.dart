@@ -26,6 +26,7 @@ class ISOMessageParsing {
   static List<dynamic>?
       result62; // Variabel statis untuk menyimpan hasil parse Bit 62
 
+  // Future<String> printResponse(String serverResponse, String idpel) async {
   Future<String> printResponse(String idpel) async {
     try {
       // IDPEL 542111228822
