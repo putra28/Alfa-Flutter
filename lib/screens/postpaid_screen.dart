@@ -162,6 +162,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
       //     setState(() {
       //       _isLoading = false;
       //     });
+
       //     String serverResponseClean = serverResponse.replaceFirst("Terjadi Kesalahan: ", "");
       //     _controller.clear();
       //     QuickAlert.show(
@@ -172,8 +173,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
       //       confirmBtnColor: Theme.of(context).colorScheme.primary,
       //     );
       //   }
-      // }
-    } catch (e) {
+      } catch (e) {
       setState(() {
         _isLoading = false;
       });
@@ -242,71 +242,72 @@ class _postpaid_screenState extends State<postpaid_screen> {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-        appBar: AppBar(
-          titleSpacing: 0,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(left: width * 0.04),
-                child: Image.asset(
-                  'assets/images/logo_alfamart_white.png',
-                  width: width * 0.20,
-                ),
+      appBar: AppBar(
+        titleSpacing: 0,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: width * 0.04),
+              child: Image.asset(
+                'assets/images/logo_alfamart_white.png',
+                width: width * 0.20,
               ),
-              Padding(
-                padding: EdgeInsets.only(right: width * 0.04),
-                child: Text(
-                  "Layanan Informasi Tagihan PLN",
-                  style: GoogleFonts.dongle(
-                    textStyle: TextStyle(
-                      fontSize: width * 0.04,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: height * 0.02),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: width * 0.04),
-                child: Image.asset(
-                  'assets/images/widthBanner.png',
-                  width: double.infinity,
-                ),
-              ),
-              SizedBox(height: height * 0.02),
-              Text(
-                'Masukkan ID Pelanggan',
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: width * 0.04),
+              child: Text(
+                "Layanan Informasi Tagihan PLN",
                 style: GoogleFonts.dongle(
                   textStyle: TextStyle(
-                    fontSize: width * 0.07,
+                    fontSize: width * 0.04,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Colors.white,
                   ),
                 ),
               ),
-              _buildInputSection(width, height),
-              SizedBox(height: height * 0.02),
-              if (_isLoading)
-                _buildShimmerEffect()
-              else if (_outputISOMessageParsing.isEmpty)
-                _buildEmptyState(width)
-              else
-                _buildResultSection(width),
-              SizedBox(height: height * 0.01),
-              if (!_outputISOMessageParsing.isEmpty)
-                _buildActionButtons(width, height),
-              SizedBox(height: height * 0.01),
-            ],
-          ),
-        ));
+            ),
+          ],
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: height * 0.02),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: width * 0.04),
+              child: Image.asset(
+                'assets/images/widthBanner.png',
+                width: double.infinity,
+              ),
+            ),
+            SizedBox(height: height * 0.02),
+            Text(
+              'Masukkan ID Pelanggan',
+              style: GoogleFonts.dongle(
+                textStyle: TextStyle(
+                  fontSize: width * 0.07,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            _buildInputSection(width, height),
+            SizedBox(height: height * 0.02),
+            if (_isLoading)
+              _buildShimmerEffect()
+            else if (_outputISOMessageParsing.isEmpty)
+              _buildEmptyState(width)
+            else
+              _buildResultSection(width),
+            SizedBox(height: height * 0.01),
+            if (!_outputISOMessageParsing.isEmpty)
+              _buildActionButtons(width, height),
+            SizedBox(height: height * 0.01),
+          ],
+        ),
+      )
+    );
   }
 
   Widget _buildInputSection(double width, double height) {
