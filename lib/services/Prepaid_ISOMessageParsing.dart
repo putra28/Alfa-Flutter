@@ -35,12 +35,12 @@ class ISOMessageParsing {
           "0054ALF001201000145100000"+
           "133JTL53L31410161770054211122882209362F3DDA3824510B3BF68DE226117952ALF210Z25355EED4B315710A05D1B2BDEV SAT PREPAID          R3  000007700360"+
           "0505454211               0000020000050000000000200000";
-          // 0000020000050000000000200000
-          // 0000000000000000000000000000
+      //     // 0000020000050000000000200000
+      //     // 0000000000000000000000000000
       return await parseISOResponse(serverResponse, idpel);
     } catch (e) {
       // return e.toString();
-      return "Terjadi Kesalahan, Silahkan Coba Lagi";
+      return "Terjadi Kesalahan: Silahkan Coba Lagi";
     }
   }
 
