@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'screens/homepage.dart';
 import 'screens/loading_screen.dart';
 import 'screens/postpaid_screen.dart';
 import 'screens/prepaid_screen.dart';

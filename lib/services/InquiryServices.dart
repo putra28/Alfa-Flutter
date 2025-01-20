@@ -1,9 +1,12 @@
 import 'dart:io';
 
+final String baseIP = "169.169.10.175";
+final int basePort = 7005; //7101
+
 class InquiryServices {
   Future<String> sendISOMessage(String isoMessage) async {
     try {
-      final socket = await Socket.connect('168.168.10.175', 7005) //7101
+      final socket = await Socket.connect(baseIP, basePort) 
           .timeout(Duration(seconds: 5), onTimeout: () {
         throw Exception('Gagal terkoneksi dengan server');
       });

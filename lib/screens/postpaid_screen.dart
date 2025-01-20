@@ -206,7 +206,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
         "var_scref": SCREF
       };
 
-      print(dataToSend);
+      // print(dataToSend);
 
       await BookingAntrian.bookingAntrian(Method!, dataToSend!);
 
@@ -225,7 +225,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
         _outputISOMessageParsing = "";
       });
     } catch (e) {
-      _showError('Terjadi Kesalahan', 'Gagal Melakukan Booking No. Antrian');
+      _showError('Terjadi Kesalahan', e.toString());
     }
   }
 
