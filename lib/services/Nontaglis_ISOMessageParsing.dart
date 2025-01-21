@@ -64,8 +64,8 @@ class ISOMessageParsing {
       // Parse the message using ISOMessageParser
       ParsedMessage parsedMessage = ISOMessageParser.parseMessage(isoMessage);
       // Print all parsed fields for debugging
-      print("=== Parsed ISO Message Fields ===");
-      print(ISOMessageParser.formatParsedMessage(parsedMessage));
+      // print("=== Parsed ISO Message Fields ===");
+      // print(ISOMessageParser.formatParsedMessage(parsedMessage));
       // Find bit 39 (response code) and bit 48 (additional data)
       String? bit39;
       String? bit48;

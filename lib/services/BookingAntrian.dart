@@ -13,7 +13,6 @@ class BookingAntrian {
         headers: {'Content-Type': 'application/json'}, body: jsonEncode(data));
 
     if (response.statusCode == 200) {
-      print('Berhasil mengirim data');
       final Map<String, dynamic> responseJson = jsonDecode(response.body);
       if (responseJson["status"] == "success") {
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -23,7 +22,6 @@ class BookingAntrian {
         throw Exception('Gagal mengirim data: ${responseJson["message"]}');
       }
     } else {
-      print('Gagal mengirim data');
       throw Exception('Gagal mengirim data: ${response.statusCode}');
     }
   }
@@ -37,7 +35,6 @@ class BookingAntrian {
               headers: {'Content-Type': 'application/json'}, body: jsonEncode(data));
 
           if (response.statusCode == 200) {
-            print('Berhasil mendapatkan data');
             final responseData = jsonDecode(response.body);
 
             // Cek apakah respons memiliki array `data`
@@ -50,14 +47,10 @@ class BookingAntrian {
               SharedPreferences prefs = await SharedPreferences.getInstance();
               prefs.setString('denomData', jsonEncode(denomData));
               String? denomm = prefs.getString('denomData');
-
-              // print("Denom : $denomm");
-              print("Data denom berhasil disimpan ke session");
             } else {
-              print("Respons tidak mengandung data");
+              // print("Respons tidak mengandung data");
             }
           } else {
-            print('Gagal mendapatkan data');
             SharedPreferences prefs = await SharedPreferences.getInstance();
             prefs.setString('denomData', 'Gagal Mendapatkan Denom');
           }

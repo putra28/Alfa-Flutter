@@ -206,8 +206,6 @@ class _postpaid_screenState extends State<postpaid_screen> {
         "var_scref": SCREF
       };
 
-      // print(dataToSend);
-
       await BookingAntrian.bookingAntrian(Method!, dataToSend!);
 
       QuickAlert.show(

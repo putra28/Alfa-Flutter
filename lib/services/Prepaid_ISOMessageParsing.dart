@@ -73,8 +73,8 @@ class ISOMessageParsing {
       ParsedMessage parsedMessage = ISOMessageParser.parseMessage(isoMessage);
   
       // Print all parsed fields for debugging
-      print("=== Parsed ISO Message Fields ===");
-      print(ISOMessageParser.formatParsedMessage(parsedMessage));
+      // print("=== Parsed ISO Message Fields ===");
+      // print(ISOMessageParser.formatParsedMessage(parsedMessage));
   
       // Find bit 39 (response code) and bit 48 (additional data)
       String? bit39;
@@ -136,9 +136,9 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
     await prefs.setString('denomUnsold', jsonEncode(denomUnsold));
 
     // Print the result for debugging
-    print(jsonEncode(denomUnsold));
+    // print(jsonEncode(denomUnsold));
   } else {
-    print("dataPerulanganVal is empty.");
+    // print("dataPerulanganVal is empty.");
   }
 }
   static Future<String> processResponseCode(
@@ -155,7 +155,7 @@ static Future<void> processPerulangan(List<int> dataPerulanganVal) async {
 
               await processPerulangan(denomPerulanganVal);
             } catch (e) {
-              print("Error processing denom values: $e");
+              return "Gagal Menerima Denom";
             }
           }
           // if (dataPerulanganVal != 0) {

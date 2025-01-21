@@ -126,8 +126,8 @@ void main() {
 
   try {
     var parsedMessage = ISOMessageParser.parseMessage(isoMessage);
-    print(ISOMessageParser.formatParsedMessage(parsedMessage));
+    // print(ISOMessageParser.formatParsedMessage(parsedMessage));
   } catch (e) {
-    print('Error parsing message: $e');
+    // print('Error parsing message: $e');
   }
 }

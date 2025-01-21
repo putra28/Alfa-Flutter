@@ -10,11 +10,9 @@ class InquiryServices {
           .timeout(Duration(seconds: 5), onTimeout: () {
         throw Exception('Gagal terkoneksi dengan server');
       });
-      print('Connected to the server.');
   
       socket.write(isoMessage);
       await socket.flush();
-      print('ISO message sent.');
   
       final responseBuffer = StringBuffer();
   
@@ -22,12 +20,12 @@ class InquiryServices {
         (data) {
           String responseChunk = String.fromCharCodes(data);
           responseBuffer.write(responseChunk);
-          print(
-              'Server Response: $responseChunk\n'); // Cetak data yang diterima (chunk)
+          // print(
+          //     'Server Response: $responseChunk\n'); // Cetak data yang diterima (chunk)
         },
         onDone: () {
-          print(
-              'Data fully received: ${responseBuffer.toString()}'); // Cetak respons penuh setelah selesai
+          // print(
+          //     'Data fully received: ${responseBuffer.toString()}'); // Cetak respons penuh setelah selesai
         },
         onError: (error) {
           throw Exception('Gagal saat memproses data: $error');
@@ -43,7 +41,6 @@ class InquiryServices {
       return responseBuffer.toString();
     } catch (e) {
       String errorMessage = e.toString().replaceFirst("Exception: ", "");
-      print('Terjadi kesalahan: $errorMessage\n');
       return 'Terjadi Kesalahan: $errorMessage';
     }
   }

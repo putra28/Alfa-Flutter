@@ -34,7 +34,4 @@ class PostpaidBitmap {
 void main() {
   // Bangun bitmap sesuai dengan field aktif
   String isoBitmap = PostpaidBitmap.buildIsoBitmap();
-
-  // Cetak bitmap dalam format hexadecimal
-  print("ISO Bitmap: $isoBitmap");
 }

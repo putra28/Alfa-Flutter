@@ -29,7 +29,6 @@ class _LoginState extends State<Login> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('IDToko', _controller.text);
     String? IDToko = prefs.getString('IDToko');
-        print("IDToko: $IDToko");
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

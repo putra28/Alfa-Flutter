@@ -105,11 +105,11 @@ void main() {
 
   if (Isobitmapparsing.isValidBitmap(bitmap)) {
     // Print format sederhana
-    print(Isobitmapparsing.printActiveBitsWithLength(bitmap));
+    // print(Isobitmapparsing.printActiveBitsWithLength(bitmap));
 
     // Print format detail
     // print(Isobitmapparsing.getDetailedActiveBits(bitmap));
   } else {
-    print('Invalid bitmap format');
+    // print('Invalid bitmap format');
   }
 }
