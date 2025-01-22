@@ -194,7 +194,7 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
       QuickAlert.show(
         context: context,
         type: QuickAlertType.success,
-        title: 'Berhasil Booking No. Antrian',
+        title: 'Berhasil Booking Antrian',
         text: "No. Antrian : ${prefs.getString('noantrian')}\n" +
             "ID Pelanggan : ${prefs.getString('idPelanggan')}",
         confirmBtnText: 'OK',
@@ -206,7 +206,7 @@ class _nontaglis_screenState extends State<nontaglis_screen> {
         _outputISOMessageParsing = "";
       });
     } catch (e) {
-      _showError('Terjadi Kesalahan', 'Gagal Melakukan Booking No. Antrian');
+      _showError('Terjadi Kesalahan', 'Gagal Melakukan Booking Antrian');
     }
   }
 

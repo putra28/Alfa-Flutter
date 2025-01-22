@@ -238,7 +238,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
       QuickAlert.show(
         context: context,
         type: QuickAlertType.success,
-        title: 'Berhasil Booking No. Antrian',
+        title: 'Berhasil Booking Antrian',
         text: "No. Antrian : ${prefs.getString('noantrian')}\n"
             "ID Pelanggan : ${prefs.getString('idpel')}\n"
             "Denom : ${currencyFormatter.format(_selectedDenom)}",
@@ -254,7 +254,7 @@ class _PrepaidScreenState extends State<prepaid_screen> {
         _totBayarValue = "";
       });
     } catch (e) {
-      _showError('Terjadi Kesalahan', 'Gagal Melakukan Booking No. Antrian');
+      _showError('Terjadi Kesalahan', 'Gagal Melakukan Booking Antrian');
     }
   }
 

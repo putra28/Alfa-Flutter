@@ -211,7 +211,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
       QuickAlert.show(
         context: context,
         type: QuickAlertType.success,
-        title: 'Berhasil Booking No. Antrian',
+        title: 'Berhasil Booking Antrian',
         text: "No. Antrian : ${prefs.getString('noantrian')}\n" +
             "ID Pelanggan : ${prefs.getString('idPelanggan')}",
         confirmBtnText: 'OK',
@@ -223,7 +223,7 @@ class _postpaid_screenState extends State<postpaid_screen> {
         _outputISOMessageParsing = "";
       });
     } catch (e) {
-      _showError('Terjadi Kesalahan', e.toString());
+      _showError('Terjadi Kesalahan', 'Gagal Melakukan Booking Antrian');
     }
   }
 
